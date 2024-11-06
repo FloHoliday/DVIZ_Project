@@ -5,9 +5,9 @@ By figgerio Finn EYER, Flo ITEM und Karim Darwiche
 ## World Mental Health and possible causes
 
 ## Important dates
-19.11-10.12.2024: coaching sessions per zoom
-17.12.2024: project presentations and peer feedback session
-07.01.2025: deadline for final submissions (before the exam session)
+- 19.11-10.12.2024: coaching sessions per zoom
+- 17.12.2024: project presentations and peer feedback session
+- 07.01.2025: deadline for final submissions (before the exam session)
 
 ### TODO
 Dashboard 1:
