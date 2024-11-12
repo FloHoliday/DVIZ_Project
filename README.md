@@ -22,7 +22,7 @@ Daten:
 - 1 Jahr wählen 
 - Bivariate Choroplethenkarte
 
-Dashboard 2:
+#### Dashboard 2:
 Inputeingaben:
 
 Was wird gezeigt:
@@ -33,7 +33,7 @@ Daten:
 - Vergleich von 2 (oder mehr) Faktoren 
 - Über ganze Zeit
 
-Dashboard 3: 
+#### Dashboard 3: 
 Inputeingaben:
 
 Was wird gezeigt:
