@@ -30,7 +30,7 @@ Was wird gezeigt:
 Daten:
 
 - 1 Land
-- Vergleich von 2 (oder mehr) Faktoren 
+- Vergleich von 2 (oder mehr) Faktoren, eine Krankheit ein Indikator(GDP)
 - Über ganze Zeit
 
 #### Dashboard 3: 
@@ -39,6 +39,20 @@ Inputeingaben:
 Was wird gezeigt:
 
 Daten:
-- Vergleich von x Ländern 
-- Für 1 Faktor
+- Vergleich von 2 Ländern 
+- Für ein Krankheiten,
 - Über ganze Zeit
+
+
+#### Dashboard 4:
+Pro Land wie grosser Anteil pro Krankheit.
+Kreisdiagramm 
+
+
+
+##### Vorgehen von User:
+Auswählen:
+  1. Jahr
+  2. Seidbar, Krankheit und Indikator
+  3. Auf Karte Landauswählen
+  4. 
