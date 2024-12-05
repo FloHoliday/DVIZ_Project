@@ -13,21 +13,6 @@ mh_data = pd.read_csv('/Users/finneyer/Documents/HSLU/Semester 3/DVIZ/Projektarb
 countries = mh_data.Entity.unique()
 available_years = mh_data['Year'].unique().tolist()
 
-# Import GDP data
-gdp_data_raw = pd.read_csv('/Users/finneyer/Documents/HSLU/Semester 3/DVIZ/Projektarbeit/DVIZ_Project/gdp.csv', delimiter=';')
-gdp_data = helper.convert_to_year_rows(gdp_data_raw)
-gdp_data = helper.remove_nan_values(gdp_data, 'Value')
-
-# Import CO2 data
-co2_data_raw = pd.read_csv('/Users/finneyer/Documents/HSLU/Semester 3/DVIZ/Projektarbeit/DVIZ_Project/co2_emissions.csv', delimiter=';')
-co2_data = helper.convert_to_year_rows(co2_data_raw)
-co2_data = helper.remove_nan_values(co2_data, 'Value')
-
-# Import unemployment rate data
-ur_data_raw = pd.read_csv('/Users/finneyer/Documents/HSLU/Semester 3/DVIZ/Projektarbeit/DVIZ_Project/unemployment_rate.csv', delimiter=';')
-ur_data = helper.convert_to_year_rows(ur_data_raw)
-ur_data = helper.remove_nan_values(ur_data, 'Value')
-
 # smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px', 'overflow':'hidden'}
 smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(0, 0, 0, 0.13) 0px 1px 4px', 'overflow':'hidden'}
 std_box_padding = {'padding': '20px'}
@@ -86,8 +71,8 @@ app.layout = html.Div(
                         dcc.Dropdown(id='slct_indicator',
                             options=[
                                 {'label': 'GDP', 'value': 'gdp'},
-                                {'label': 'CO2 emissions', 'value': 'co2'},
-                                {'label': 'Unemployment rate', 'value': 'ur'}
+                                {'label': 'CO2 emissions', 'value': 'co2_emissions'},
+                                {'label': 'Unemployment rate', 'value': 'unemployment_rate'}
                             ],
                             multi=False,
                             placeholder='Select an indicator',
@@ -186,32 +171,36 @@ app.layout = html.Div(
 @app.callback(
      Output(component_id='disorders_graph', component_property='figure'),
     [Input(component_id='slct_disorder', component_property='value'),
-     Input(component_id='slct_indicator', component_property='value')]
+     Input(component_id='slct_indicator', component_property='value'),
+     Input(component_id='slct_country', component_property='value')]
 )
 
-def update_graphs(disorder, indicator):
-    if not disorder or not indicator:
+def update_corr_graph(disorder, indicator, country_code):
+    if not disorder or not indicator or not country_code:
         return dc.get_default_disorder_graph(colors)
     
-    mh_data_cp = mh_data[mh_data['Entity'] == 'Switzerland'][['Year', disorder]]
+    mh_data_country = mh_data[mh_data['Code'] == country_code]
+    mh_data_disorder = mh_data_country[['Year', disorder]]
+    mh_data_indicator = mh_data_country[['Year', indicator]]
     mh_display_name = disorder.replace('_', ' ').capitalize()
-    
+    indicator_title = ''
+
     match indicator:
         case 'gdp':
-            indicator_data = gdp_data[gdp_data['Country Name'] == 'Switzerland'][['Year', 'Value']]
             indicator_title = 'GDP (in billions)'
-        case 'co2':
-            indicator_data = co2_data[co2_data['Country Name'] == 'Switzerland'][['Year', 'Value']]
+        case 'co2_emissions':
             indicator_title = 'CO2 emissions'
-        case 'ur':
-            indicator_data = ur_data[ur_data['Country Name'] == 'Switzerland'][['Year', 'Value']]
+        case 'unemployment_rate':
             indicator_title = 'Unemployment rate'
+        case _:
+            print(f"An unknown indicator {indicator} is given")
+            return dc.get_default_disorder_graph(colors)
         
     fig = go.Figure()
     # Add mental health line (primary y-axis)
     fig.add_trace(go.Scatter(
-        x=mh_data_cp['Year'],
-        y=mh_data_cp[disorder],
+        x=mh_data_disorder['Year'],
+        y=mh_data_disorder[disorder],
         mode='lines',
         name=f'{mh_display_name}',
         line=dict(color=colors['green'], width=2),
@@ -220,8 +209,8 @@ def update_graphs(disorder, indicator):
     ))
     # Add line (secondary y-axis)
     fig.add_trace(go.Scatter(
-        x=indicator_data['Year'],
-        y=indicator_data['Value'],
+        x=mh_data_indicator['Year'],
+        y=mh_data_indicator[indicator],
         mode='lines',
         name=indicator_title,
         line=dict(color=colors['blue'], width=2),
