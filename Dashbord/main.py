@@ -4,6 +4,8 @@ import plotly.graph_objects as go
 import numpy as np
 import helper
 import default_components as dc
+import corr_graph as cg
+import map_functions as mf
 
 
 app = Dash(__name__)
@@ -17,6 +19,10 @@ available_years = mh_data['Year'].unique().tolist()
 smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(0, 0, 0, 0.13) 0px 1px 4px', 'overflow':'hidden'}
 std_box_padding = {'padding': '20px'}
 colors = {'green': '#38adad', 'blue': '#3b4994', 'color2':'#ace4e4', 'color3': '#5ac8c8', 'color1':'#dfb0d6'}
+
+# Data preparation for the map
+disorders_factors = list(mh_data.columns)[3:]
+mh_data_map = mf.classify_disorders(mh_data, disorders_factors)
 
 # Main wrapper element
 app.layout = html.Div(
@@ -125,9 +131,7 @@ app.layout = html.Div(
                 html.Div(id='map-box',
                     style={'width':'100%', 'margin-bottom': '20px', **smoth_border_style},
                     children=[
-                        dcc.Graph(id='disorder_map'
-                           
-                        )
+                        dcc.Graph(id='disorder_map')
                     ]
                 ),
                 
@@ -169,6 +173,21 @@ app.layout = html.Div(
 )
 
 @app.callback(
+      Output(component_id='disorder_map', component_property='figure'),
+    [Input(component_id='slct_disorder', component_property='value'),
+     Input(component_id='slct_indicator', component_property='value')]
+)
+
+def update_corr_graph(disorder, indicator):
+    if not disorder or not indicator:
+        return cg.get_default_disorder_graph(colors)
+    
+    map_fig = mf.plot_bivariate_map(mh_data_map, disorder, indicator, 'pink-blue')
+
+    return map_fig
+
+
+@app.callback(
      Output(component_id='disorders_graph', component_property='figure'),
     [Input(component_id='slct_disorder', component_property='value'),
      Input(component_id='slct_indicator', component_property='value'),
@@ -177,197 +196,67 @@ app.layout = html.Div(
 
 def update_corr_graph(disorder, indicator, country_code):
     if not disorder or not indicator or not country_code:
-        return dc.get_default_disorder_graph(colors)
+        return cg.get_default_disorder_graph(colors)
     
-    mh_data_country = mh_data[mh_data['Code'] == country_code]
-    mh_data_disorder = mh_data_country[['Year', disorder]]
-    mh_data_indicator = mh_data_country[['Year', indicator]]
-    mh_display_name = disorder.replace('_', ' ').capitalize()
-    indicator_title = ''
+    corr_fig = cg.get_corr_graph(mh_data, disorder, indicator, country_code, colors)
 
-    match indicator:
-        case 'gdp':
-            indicator_title = 'GDP (in billions)'
-        case 'co2_emissions':
-            indicator_title = 'CO2 emissions'
-        case 'unemployment_rate':
-            indicator_title = 'Unemployment rate'
-        case _:
-            print(f"An unknown indicator {indicator} is given")
-            return dc.get_default_disorder_graph(colors)
-        
-    fig = go.Figure()
-    # Add mental health line (primary y-axis)
-    fig.add_trace(go.Scatter(
-        x=mh_data_disorder['Year'],
-        y=mh_data_disorder[disorder],
-        mode='lines',
-        name=f'{mh_display_name}',
-        line=dict(color=colors['green'], width=2),
-        line_shape='spline',
-        yaxis='y1'
-    ))
-    # Add line (secondary y-axis)
-    fig.add_trace(go.Scatter(
-        x=mh_data_indicator['Year'],
-        y=mh_data_indicator[indicator],
-        mode='lines',
-        name=indicator_title,
-        line=dict(color=colors['blue'], width=2),
-        line_shape='spline',
-        yaxis='y2'
-    ))
-    # Update layout for secondary y-axis
-    fig.update_layout(
-        # Title
-        title={
-            'text': f'{mh_display_name} and {indicator_title} in Switzerland over the Years',
-            'x': 0.5,  # Center the title
-            'xanchor': 'center',
-            'yanchor': 'top',
-            'font': {
-                'size': 18,
-                'color': '#333',  # Dark gray for a modern look
-                'family': 'Roboto, Arial, sans-serif'  # Clean sans-serif font
-            }
-        },
-        
-        # Background
-        plot_bgcolor='#f9f9f9',  
-        paper_bgcolor='#ffffff',  
-        
-        # Axes
-        xaxis=dict(
-            title='Year',
-            showgrid=False,  # No grid lines for a clean look
-            showline=True,  # Show axis lines
-            linecolor='black',  # Axis line color
-            ticks='outside',  # Ticks pointing outward
-            tickcolor='black',
-            tickfont=dict(
-                size=12,
-                color='#333'
-            ),
-            titlefont=dict(
-                size=14,
-                color='#333'
-            )
-        ),
-        yaxis=dict(
-            title=f'{mh_display_name}',
-            showgrid=False,  
-            gridcolor='#eaeaea', 
-            zeroline=False,  
-            showline=True,
-            linecolor=colors['green'],
-            ticks='outside',
-            tickcolor=colors['green'],
-            tickfont=dict(
-                size=12,
-                color=colors['green']
-            ),
-            titlefont=dict(
-                size=14,
-                color=colors['green']
-            )
-        ),
-        yaxis2=dict(
-            title=indicator_title,
-            overlaying='y',
-            side='right',
-            showgrid=False,
-            showline=True,
-            linecolor=colors['blue'],
-            tickcolor=colors['blue'],
-            tickfont=dict(
-                size=12,
-                color=colors['blue']
-            ),
-            titlefont=dict(
-                size=14,
-                color=colors['blue']
-            )
-        ),
-        
-        # Legend
-        legend=dict(
-            orientation='h',  # Horizontal layout for the legend
-            x=0.5,
-            xanchor='center',
-            y=-0.2,
-            font=dict(
-                size=12,
-                color='#333'
-            )
-        ),
-        
-        # Margins
-        margin=dict(
-            l=50,  # Left margin
-            r=50,  # Right margin
-            t=50,  # Top margin
-            b=40   # Bottom margin
-        ),
-        
-        # Template
-        template='simple_white',  # Clean white template
-    )
-
-    return fig
+    return corr_fig
 
 
-@app.callback(
-    Output(component_id='disorders_donut', component_property='figure'),
-    [Input(component_id='slct_country', component_property='value'),
-     Input(component_id='year_slider', component_property='value')]
-)
 
-def update_donut(country, year):
+
+# @app.callback(
+#     Output(component_id='disorders_donut', component_property='figure'),
+#     [Input(component_id='slct_country', component_property='value'),
+#      Input(component_id='year_slider', component_property='value')]
+# )
+
+# def update_donut(country, year):
     
-    if not country or not year:
-        return dc.get_default_donut(colors)
+#     if not country or not year:
+#         return dc.get_default_donut(colors)
     
-    mental_health_columns = ['schizophrenia', 'depressive_disorder',
-                        'anxiety_disorders', 'bipolar_disorders',
-                        'eating_disorders']
-    labels = [col.replace('_', ' ').title() for col in mental_health_columns]
-    mh_data_filtered = mh_data[(mh_data['Code'] == country) & (mh_data['Year'] == year)]
-    values = mh_data_filtered[mental_health_columns].values.flatten()
+#     mental_health_columns = ['schizophrenia', 'depressive_disorder',
+#                         'anxiety_disorders', 'bipolar_disorders',
+#                         'eating_disorders']
+#     labels = [col.replace('_', ' ').title() for col in mental_health_columns]
+#     mh_data_filtered = mh_data[(mh_data['Code'] == country) & (mh_data['Year'] == year)]
+#     values = mh_data_filtered[mental_health_columns].values.flatten()
     
     
-    # Create the donut chart
-    fig = go.Figure(data=[go.Pie(
-        labels=labels,
-        values=values,
-        hole=0.4,
-        # textinfo='label+percent',
-        # textposition='inside',
-        # texttemplate='%{label}<br>%{percent:.1%}',
-        marker=dict(colors=[color for key, color in colors.items()])
-    )])
+#     # Create the donut chart
+#     fig = go.Figure(data=[go.Pie(
+#         labels=labels,
+#         values=values,
+#         hole=0.4,
+#         # textinfo='label+percent',
+#         # textposition='inside',
+#         # texttemplate='%{label}<br>%{percent:.1%}',
+#         marker=dict(colors=[color for key, color in colors.items()])
+#     )])
 
-    # Update layout
-    country_name = mh_data_filtered[mh_data_filtered['Code'] == country]['Entity'].iloc[0]
-    fig.update_layout(
-        title={
-            'text': f"Mental Health Distribution -<br>{country_name} ({year})",
-            # 'y': 0.95,
-            'x': 0.5,
-            'xanchor': 'center'
-            # 'yanchor': 'top'
-        },
-        autosize=True,
-        showlegend=True,
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.6,
-            x= 0.5,
-            xanchor="center",
-        ),
-        margin=dict(t=90, b=120, l=30, r=30)
-    )
-    return fig
+#     # Update layout
+#     country_name = mh_data_filtered[mh_data_filtered['Code'] == country]['Entity'].iloc[0]
+#     fig.update_layout(
+#         title={
+#             'text': f"Mental Health Distribution -<br>{country_name} ({year})",
+#             # 'y': 0.95,
+#             'x': 0.5,
+#             'xanchor': 'center'
+#             # 'yanchor': 'top'
+#         },
+#         autosize=True,
+#         showlegend=True,
+#         legend=dict(
+#             orientation="h",
+#             yanchor="bottom",
+#             y=-0.6,
+#             x= 0.5,
+#             xanchor="center",
+#         ),
+#         margin=dict(t=90, b=120, l=30, r=30)
+#     )
+#     return fig
     
 
 
