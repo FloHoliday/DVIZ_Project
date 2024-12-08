@@ -16,7 +16,7 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, colors):
             indicator_title = 'Unemployment rate'
         case _:
             print(f"An unknown indicator {indicator} is given")
-            return get_default_disorder_graph(colors)
+            return get_default_corr_graph(colors)
         
     fig = go.Figure()
     # Add mental health line (primary y-axis)
@@ -43,7 +43,7 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, colors):
     fig.update_layout(
         # Title
         title={
-            'text': f'{mh_display_name} and {indicator_title} in Switzerland over the Years',
+            'text': f'{mh_display_name} and {indicator_title} in {country_code} over the Years',
             'x': 0.5,  # Center the title
             'xanchor': 'center',
             'yanchor': 'top',
@@ -137,7 +137,7 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, colors):
     return fig
     
     
-def get_default_disorder_graph(colors):
+def get_default_corr_graph(colors):
     """Create a default figure with styling but no data."""
     fig = go.Figure()
     fig.update_layout(

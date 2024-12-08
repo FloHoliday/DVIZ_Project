@@ -171,7 +171,7 @@ def add_bivariate_legend(fig, x_legend, y_legend, colors, conf=None):
     return fig
 
 
-def plot_bivariate_map(df, disorder, factor, color_set_name):
+def plot_bivariate_map(df, disorder, factor, year,color_set_name):
     """
     Plot a bivariate choropleth map based on classifications.
 
@@ -186,6 +186,8 @@ def plot_bivariate_map(df, disorder, factor, color_set_name):
     - go.Figure: The Plotly figure.
     """
     
+    df_year = df[df['Year'] == year]
+    
     # Select the color set
     color_sets = get_map_color_sets()
     colors = color_sets[color_set_name]
@@ -194,7 +196,7 @@ def plot_bivariate_map(df, disorder, factor, color_set_name):
     color_mapping = create_bivariate_color_mapping(colors)
 
     # Assign colors to countries
-    df = assign_bivariate_colors(df, disorder, factor, color_mapping)
+    df = assign_bivariate_colors(df_year, disorder, factor, color_mapping)
 
     # Create the choropleth map
     fig = px.choropleth(

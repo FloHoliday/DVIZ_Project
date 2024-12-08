@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 import helper
-import default_components as dc
 import corr_graph as cg
 import map_functions as mf
 
@@ -15,7 +14,6 @@ mh_data = pd.read_csv('/Users/finneyer/Documents/HSLU/Semester 3/DVIZ/Projektarb
 countries = mh_data.Entity.unique()
 available_years = mh_data['Year'].unique().tolist()
 
-# smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px', 'overflow':'hidden'}
 smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(0, 0, 0, 0.13) 0px 1px 4px', 'overflow':'hidden'}
 std_box_padding = {'padding': '20px'}
 colors = {'green': '#38adad', 'blue': '#3b4994', 'color2':'#ace4e4', 'color3': '#5ac8c8', 'color1':'#dfb0d6'}
@@ -82,16 +80,6 @@ app.layout = html.Div(
                             ],
                             multi=False,
                             placeholder='Select an indicator',
-                            style={'width': '100%'}
-                        ),
-                        # Drop down for the country (delete as soon as the map works)
-                        dcc.Dropdown(id='slct_country',
-                            options=[
-                                {'label': 'Switzerland', 'value': 'CHE'},
-                                {'label': 'Afghanistan', 'value': 'AFG'},
-                            ],
-                            multi=False,
-                            placeholder='Select an Country',
                             style={'width': '100%'}
                         )
                     ]
@@ -175,14 +163,15 @@ app.layout = html.Div(
 @app.callback(
       Output(component_id='disorder_map', component_property='figure'),
     [Input(component_id='slct_disorder', component_property='value'),
-     Input(component_id='slct_indicator', component_property='value')]
+     Input(component_id='slct_indicator', component_property='value'),
+     Input(component_id='year_slider', component_property='value')]
 )
 
-def update_corr_graph(disorder, indicator):
+def update_corr_graph(disorder, indicator, year):
     if not disorder or not indicator:
-        return cg.get_default_disorder_graph(colors)
+        return cg.get_default_corr_graph(colors)
     
-    map_fig = mf.plot_bivariate_map(mh_data_map, disorder, indicator, 'pink-blue')
+    map_fig = mf.plot_bivariate_map(mh_data_map, disorder, indicator, year,'pink-blue')
 
     return map_fig
 
@@ -191,13 +180,15 @@ def update_corr_graph(disorder, indicator):
      Output(component_id='disorders_graph', component_property='figure'),
     [Input(component_id='slct_disorder', component_property='value'),
      Input(component_id='slct_indicator', component_property='value'),
-     Input(component_id='slct_country', component_property='value')]
+     Input(component_id='disorder_map', component_property='clickData')]
 )
 
-def update_corr_graph(disorder, indicator, country_code):
-    if not disorder or not indicator or not country_code:
-        return cg.get_default_disorder_graph(colors)
+def update_corr_graph(disorder, indicator, click_data):
     
+    if not disorder or not indicator or not click_data:
+        return cg.get_default_corr_graph(colors)
+    
+    country_code = click_data['points'][0]['location']
     corr_fig = cg.get_corr_graph(mh_data, disorder, indicator, country_code, colors)
 
     return corr_fig
