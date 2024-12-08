@@ -1,10 +1,10 @@
 import plotly.graph_objects as go
-def get_donut_graph(mh_data, country, year, colors):
+def get_donut_graph(mh_data, country_code, country_name, year, colors):
     mental_health_columns = ['schizophrenia', 'depressive_disorder',
                         'anxiety_disorders', 'bipolar_disorders',
                         'eating_disorders']
     labels = [col.replace('_', ' ').title() for col in mental_health_columns]
-    mh_data_filtered = mh_data[(mh_data['Code'] == country) & (mh_data['Year'] == year)]
+    mh_data_filtered = mh_data[(mh_data['Code'] == country_code) & (mh_data['Year'] == year)]
     values = mh_data_filtered[mental_health_columns].values.flatten()
     
     
@@ -20,7 +20,6 @@ def get_donut_graph(mh_data, country, year, colors):
     )])
 
     # Update layout
-    country_name = mh_data_filtered[mh_data_filtered['Code'] == country]['Entity'].iloc[0]
     fig.update_layout(
         title={
             'text': f"Mental Health Distribution -<br>{country_name} ({year})",

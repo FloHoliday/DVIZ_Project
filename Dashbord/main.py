@@ -28,6 +28,9 @@ colors = {
     'neutral': '#9ca3af'    # Gray for weak correlation
 }
 
+country_code_df = mh_data[['Entity', 'Code']].drop_duplicates()
+country_dict = dict(zip(country_code_df['Code'], country_code_df['Entity']))
+
 # Data preparation for the map
 disorders_factors = list(mh_data.columns)[3:]
 mh_data_cp = mh_data.copy()
@@ -183,7 +186,7 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-                # New Correlation Analysis Section
+                # Correlation Analysis Section
                 html.Div(id='correlation-box',
                     style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'padding': '20px', 'box-sizing': 'border-box'},
                     children=[
@@ -277,8 +280,9 @@ def update_corr_and_donut(disorder, indicator, click_data, year):
         return cg.get_default_corr_graph(colors), dg.get_default_donut(colors)
     
     country_code = click_data['points'][0]['location']
-    corr_fig = cg.get_corr_graph(mh_data, disorder, indicator, country_code, colors)
-    donut_fig = dg.get_donut_graph(mh_data, country_code, year, colors)
+    country_name = country_dict[country_code]
+    corr_fig = cg.get_corr_graph(mh_data, disorder, indicator, country_code, country_name, colors)
+    donut_fig = dg.get_donut_graph(mh_data, country_code, country_name, year, colors)
 
     return corr_fig, donut_fig    
 
@@ -301,7 +305,8 @@ def update_correlation(click_data, disorder, indicator):
         return ce.get_default_corr_expl(colors)
 
     country_code = click_data['points'][0]['location']
-    corr_explain = ce.get_corr_expl(mh_data, country_code, disorder, indicator, colors)
+    country_name = country_dict[country_code]
+    corr_explain = ce.get_corr_expl(mh_data, country_code, country_name, disorder, indicator, colors)
     
     return corr_explain[0], corr_explain[1], corr_explain[2], corr_explain[3], corr_explain[4], corr_explain[5]
 

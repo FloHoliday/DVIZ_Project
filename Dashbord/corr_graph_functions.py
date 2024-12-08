@@ -1,6 +1,6 @@
 import plotly.graph_objects as go
 
-def get_corr_graph(mh_data, disorder, indicator, country_code, colors):
+def get_corr_graph(mh_data, disorder, indicator, country_code, country_name ,colors):
     mh_data_country = mh_data[mh_data['Code'] == country_code]
     mh_data_disorder = mh_data_country[['Year', disorder]]
     mh_data_indicator = mh_data_country[['Year', indicator]]
@@ -43,7 +43,7 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, colors):
     fig.update_layout(
         # Title
         title={
-            'text': f'{mh_display_name} and {indicator_title} in {country_code} over the Years',
+            'text': f'{mh_display_name} and {indicator_title} in {country_name} over the Years',
             'x': 0.5,  # Center the title
             'xanchor': 'center',
             'yanchor': 'top',

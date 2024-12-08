@@ -9,10 +9,9 @@ def get_default_corr_expl(colors):
                "Please select a country, disorder, and indicator to see the correlation analysis."
                
     
-def get_corr_expl(mh_data, country_code, disorder, indicator, colors):           
+def get_corr_expl(mh_data, country_code, country_name, disorder, indicator, colors):           
     # Filter data for selected country
     country_data = mh_data[mh_data['Code'] == country_code].copy()
-    country_name = mh_data[mh_data['Code'] == country_code]['Entity'].iloc[0]
 
     # Calculate correlation
     x = country_data[disorder].values
