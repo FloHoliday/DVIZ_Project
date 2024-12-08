@@ -1,11 +1,10 @@
 from dash import Dash, dcc, html, Input, Output
 import pandas as pd
-import plotly.graph_objects as go
-import numpy as np
 
 import corr_graph_functions as cg
 import map_functions as mf
 import donut_graph_functions as dg
+import corr_explain_functions as ce
 
 
 app = Dash(__name__)
@@ -17,11 +16,22 @@ available_years = mh_data['Year'].unique().tolist()
 
 smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(0, 0, 0, 0.13) 0px 1px 4px', 'overflow':'hidden'}
 std_box_padding = {'padding': '20px'}
-colors = {'green': '#38adad', 'blue': '#3b4994', 'lightblue':'#ace4e4', 'midlbue': '#5ac8c8', 'dense_pink':'#dfb0d6'}
+
+colors = {
+    'green': '#38adad',
+    'blue': '#3b4994',
+    'lightblue': '#ace4e4',
+    'midlbue': '#5ac8c8',
+    'dense_pink': '#dfb0d6',
+    'positive': '#34d399',  # Green for positive correlation
+    'negative': '#f87171',  # Red for negative correlation
+    'neutral': '#9ca3af'    # Gray for weak correlation
+}
 
 # Data preparation for the map
 disorders_factors = list(mh_data.columns)[3:]
-mh_data_map = mf.classify_disorders(mh_data, disorders_factors)
+mh_data_cp = mh_data.copy()
+mh_data_map = mf.classify_disorders(mh_data_cp, disorders_factors)
 
 # Main wrapper element
 app.layout = html.Div(
@@ -60,7 +70,7 @@ app.layout = html.Div(
                     id='dropdown-wrapper',
                     style={'width':'100%', 'margin-bottom': '150px'},
                     children=[
-                        html.H3("Select", style={'margin': '0 0 20px 0'}),
+                        html.H3("Select disorder & indicator", style={'margin': '0 0 20px 0'}),
                         dcc.Dropdown(id='slct_disorder',
                             options=[
                                 {'label': 'Schizophrenia', 'value': 'schizophrenia'},
@@ -85,7 +95,7 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-                html.P('© 2024 Team cool guys', id='copyright-text', style={'font-size': '12px'})
+                html.P('© 2024 Karim, Florian & Finn', id='copyright-text', style={'font-size': '12px'})
             ]
         ),
         
@@ -143,7 +153,7 @@ app.layout = html.Div(
                 
                 # Wrapper for first row after map
                 html.Div(id='disorder-graph-wrapper',
-                    style={'width':'100%', 'display':'flex', 'justify-content':'space-between'},
+                    style={'width':'100%', 'display':'flex', 'justify-content':'space-between', 'margin': '0 0 20px 0'},
                     children=[
                         html.Div(id='graph1-container',
                             style={'width':'69%'},
@@ -171,6 +181,62 @@ app.layout = html.Div(
                                 dcc.Graph(id='disorders_donut',style={'width':'100%'})
                             ]
                         )
+                    ]
+                ),
+                # New Correlation Analysis Section
+                html.Div(id='correlation-box',
+                    style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'padding': '20px', 'box-sizing': 'border-box'},
+                    children=[
+                        html.H3('Correlation Analysis', style={'margin-bottom': '15px'}),
+                        html.Div(id='correlation-content',
+                            style={'display': 'flex', 'align-items': 'center', 'justify-content': 'space-between'},
+                            children=[
+                                # Left section - Correlation coefficient
+                                html.Div(style={'width': '30%', 'text-align': 'center'},
+                                    children=[
+                                        html.H2(id='correlation-value',
+                                            style={'font-size': '48px', 'margin': '0', 'font-weight': 'bold'}
+                                        ),
+                                        html.P(id='correlation-label',
+                                            style={'margin': '5px 0', 'color': '#666'}
+                                        )
+                                    ]
+                                ),
+                                # Center section - Strength bar
+                                html.Div(style={'width': '40%'},
+                                    children=[
+                                        html.Div(style={'margin-bottom': '5px'},
+                                            children=[
+                                                html.Span("Correlation Strength", style={'color': '#666'}),
+                                                html.Span(id='strength-label',
+                                                    style={'float': 'right', 'font-weight': 'bold'}
+                                                )
+                                            ]
+                                        ),
+                                        html.Div(style={
+                                            'width': '100%',
+                                            'height': '10px',
+                                            'background-color': '#f3f4f6',
+                                            'border-radius': '5px',
+                                            'overflow': 'hidden'
+                                        },
+                                            children=[
+                                                html.Div(id='strength-bar',
+                                                    style={
+                                                        'height': '100%',
+                                                        'width': '0%',
+                                                        'transition': 'width 0.5s ease-in-out'
+                                                    }
+                                                )
+                                            ]
+                                        )
+                                    ]
+                                ),
+                                # Right section - Interpretation
+                                html.Div(id='correlation-interpretation', style={'width': '25%', 'padding': '10px', 'border-left': '2px solid #f3f4f6'})
+                            ]
+                        ),
+                        html.Em("Note: Correlation does not imply causation—these relationships are complex and multifaceted.", style={'color': '#666', 'font-size': '14px'})
                     ]
                 )
             ]
@@ -215,6 +281,30 @@ def update_corr_and_donut(disorder, indicator, click_data, year):
     donut_fig = dg.get_donut_graph(mh_data, country_code, year, colors)
 
     return corr_fig, donut_fig    
+
+
+
+# Correlation explaination callback
+@app.callback(
+    [Output('correlation-value', 'children'),
+     Output('correlation-value', 'style'),
+     Output('correlation-label', 'children'),
+     Output('strength-bar', 'style'),
+     Output('strength-label', 'children'),
+     Output('correlation-interpretation', 'children')],
+    [Input(component_id='disorder_map', component_property='clickData'),
+     Input('slct_disorder', 'value'),
+     Input('slct_indicator', 'value')]
+)
+def update_correlation(click_data, disorder, indicator):
+    if not all([click_data, disorder, indicator]):
+        return ce.get_default_corr_expl(colors)
+
+    country_code = click_data['points'][0]['location']
+    corr_explain = ce.get_corr_expl(mh_data, country_code, disorder, indicator, colors)
+    
+    return corr_explain[0], corr_explain[1], corr_explain[2], corr_explain[3], corr_explain[4], corr_explain[5]
+
 
 
 if __name__ == '__main__':
