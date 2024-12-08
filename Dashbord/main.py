@@ -17,7 +17,7 @@ available_years = mh_data['Year'].unique().tolist()
 
 smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(0, 0, 0, 0.13) 0px 1px 4px', 'overflow':'hidden'}
 std_box_padding = {'padding': '20px'}
-colors = {'green': '#38adad', 'blue': '#3b4994', 'color2':'#ace4e4', 'color3': '#5ac8c8', 'color1':'#dfb0d6'}
+colors = {'green': '#38adad', 'blue': '#3b4994', 'lightblue':'#ace4e4', 'midlbue': '#5ac8c8', 'dense_pink':'#dfb0d6'}
 
 # Data preparation for the map
 disorders_factors = list(mh_data.columns)[3:]
@@ -96,9 +96,15 @@ app.layout = html.Div(
                 html.Div(id='title-wrapper',
                     style={'background-color': 'white', **smoth_border_style, 'margin': '0 0 20px 0', **std_box_padding},
                     children=[
-                        html.H1('Mental Illness Correlation'),
-                        html.P('Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.',
-                            style={'color':'#737373'}),
+                        html.H1('Mental Health & Societal Factors Dashboard'),
+                        html.Div(
+                            style={'color': '#737373'},
+                            children=[
+                                html.P("Mental health conditions affect hundreds of millions of people worldwide, yet their relationship with societal and economic factors remains under-explored. This dashboard visualizes the prevalence of various mental health disorders across different countries and examines their potential correlations with key societal indicators such as GDP, CO₂ emissions, and unemployment rates."),
+                                html.P("Each mental health condition tracked here—from depression and anxiety to schizophrenia and eating disorders—affects individuals differently and may be influenced by various environmental and societal factors. By exploring these relationships, we can better understand how economic and environmental conditions might interact with mental health at a population level."),
+                                html.P("Use the sidebar controls to select specific mental health conditions and indicators. The visualization tools allow you to explore prevalence rates across different countries, analyze trends over time, and examine potential correlations between mental health and societal factors. ")
+                            ]
+                        )
                     ]
                 ),
                 
