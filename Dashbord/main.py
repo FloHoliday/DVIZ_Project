@@ -2,9 +2,10 @@ from dash import Dash, dcc, html, Input, Output
 import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
-import helper
-import corr_graph as cg
+
+import corr_graph_functions as cg
 import map_functions as mf
+import donut_graph_functions as dg
 
 
 app = Dash(__name__)
@@ -160,6 +161,7 @@ app.layout = html.Div(
     ] 
 )
 
+# Map Callback
 @app.callback(
       Output(component_id='disorder_map', component_property='figure'),
     [Input(component_id='slct_disorder', component_property='value'),
@@ -167,7 +169,7 @@ app.layout = html.Div(
      Input(component_id='year_slider', component_property='value')]
 )
 
-def update_corr_graph(disorder, indicator, year):
+def update_map(disorder, indicator, year):
     if not disorder or not indicator:
         return cg.get_default_corr_graph(colors)
     
@@ -176,79 +178,26 @@ def update_corr_graph(disorder, indicator, year):
     return map_fig
 
 
+# Correlation graph & donut callback
 @app.callback(
-     Output(component_id='disorders_graph', component_property='figure'),
+     [Output(component_id='disorders_graph', component_property='figure'),
+      Output(component_id='disorders_donut', component_property='figure')],
     [Input(component_id='slct_disorder', component_property='value'),
      Input(component_id='slct_indicator', component_property='value'),
-     Input(component_id='disorder_map', component_property='clickData')]
+     Input(component_id='disorder_map', component_property='clickData'),
+     Input(component_id='year_slider', component_property='value')]
 )
 
-def update_corr_graph(disorder, indicator, click_data):
+def update_corr_and_donut(disorder, indicator, click_data, year):
     
     if not disorder or not indicator or not click_data:
-        return cg.get_default_corr_graph(colors)
+        return cg.get_default_corr_graph(colors), dg.get_default_donut(colors)
     
     country_code = click_data['points'][0]['location']
     corr_fig = cg.get_corr_graph(mh_data, disorder, indicator, country_code, colors)
+    donut_fig = dg.get_donut_graph(mh_data, country_code, year, colors)
 
-    return corr_fig
-
-
-
-
-# @app.callback(
-#     Output(component_id='disorders_donut', component_property='figure'),
-#     [Input(component_id='slct_country', component_property='value'),
-#      Input(component_id='year_slider', component_property='value')]
-# )
-
-# def update_donut(country, year):
-    
-#     if not country or not year:
-#         return dc.get_default_donut(colors)
-    
-#     mental_health_columns = ['schizophrenia', 'depressive_disorder',
-#                         'anxiety_disorders', 'bipolar_disorders',
-#                         'eating_disorders']
-#     labels = [col.replace('_', ' ').title() for col in mental_health_columns]
-#     mh_data_filtered = mh_data[(mh_data['Code'] == country) & (mh_data['Year'] == year)]
-#     values = mh_data_filtered[mental_health_columns].values.flatten()
-    
-    
-#     # Create the donut chart
-#     fig = go.Figure(data=[go.Pie(
-#         labels=labels,
-#         values=values,
-#         hole=0.4,
-#         # textinfo='label+percent',
-#         # textposition='inside',
-#         # texttemplate='%{label}<br>%{percent:.1%}',
-#         marker=dict(colors=[color for key, color in colors.items()])
-#     )])
-
-#     # Update layout
-#     country_name = mh_data_filtered[mh_data_filtered['Code'] == country]['Entity'].iloc[0]
-#     fig.update_layout(
-#         title={
-#             'text': f"Mental Health Distribution -<br>{country_name} ({year})",
-#             # 'y': 0.95,
-#             'x': 0.5,
-#             'xanchor': 'center'
-#             # 'yanchor': 'top'
-#         },
-#         autosize=True,
-#         showlegend=True,
-#         legend=dict(
-#             orientation="h",
-#             yanchor="bottom",
-#             y=-0.6,
-#             x= 0.5,
-#             xanchor="center",
-#         ),
-#         margin=dict(t=90, b=120, l=30, r=30)
-#     )
-#     return fig
-    
+    return corr_fig, donut_fig    
 
 
 if __name__ == '__main__':
