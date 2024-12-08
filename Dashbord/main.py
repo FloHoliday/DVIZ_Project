@@ -5,6 +5,7 @@ import corr_graph_functions as cg
 import map_functions as mf
 import donut_graph_functions as dg
 import corr_explain_functions as ce
+import country_comparison_functions as ccf
 
 
 app = Dash(__name__)
@@ -13,6 +14,10 @@ app = Dash(__name__)
 mh_data = pd.read_csv('mental_health.csv', delimiter=';')
 countries = mh_data.Entity.unique()
 available_years = mh_data['Year'].unique().tolist()
+
+# Filter out nulls first, then remove duplicates
+filtered_data = mh_data[mh_data["Code"].notna()]
+unique_countries = filtered_data[["Entity", "Code"]].drop_duplicates()
 
 smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(0, 0, 0, 0.13) 0px 1px 4px', 'overflow':'hidden'}
 std_box_padding = {'padding': '20px'}
@@ -241,6 +246,60 @@ app.layout = html.Div(
                         ),
                         html.Em("Note: Correlation does not imply causation—these relationships are complex and multifaceted.", style={'color': '#666', 'font-size': '14px'})
                     ]
+                ),
+                
+                # comparison
+                html.Div(id='country-comparison-box',
+                    style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'margin-top': '20px', 'padding': '20px', 'box-sizing': 'border-box'},
+                    children=[
+                        # Title and description section
+                        html.Div(
+                            style={'margin-bottom': '20px'},
+                            children=[
+                                html.H3('Country Comparison', style={'margin-bottom': '8px'}),
+                                html.P(
+                                    'Compare mental health indicators and societal factors between two countries to identify patterns and correlations.',
+                                    style={'color': '#666', 'margin': '0'}
+                                )
+                            ]
+                        ),
+                        # Country selection row
+                        html.Div(
+                            style={'display': 'flex', 'align-items': 'center', 'gap': '20px', 'margin-bottom': '20px'},
+                            children=[
+                                # First country display
+                                html.Div(
+                                    style={'flex': '1'},
+                                    children=[
+                                        html.Label("Base Country", style={'margin-bottom': '5px', 'display': 'block', 'font-weight': 'bold'}),
+                                        html.Div(id='selected_country_display', 
+                                            style={
+                                                'padding': '8px 12px',
+                                                'border': '1px solid #e5e7eb',
+                                                'border-radius': '4px',
+                                                'background-color': '#f9fafb'
+                                            })
+                                    ]
+                                ),
+                                # Second country dropdown
+                                html.Div(
+                                    style={'flex': '1'},
+                                    children=[
+                                        html.Label("Comparison Country", style={'margin-bottom': '5px', 'display': 'block', 'font-weight': 'bold'}),
+                                        dcc.Dropdown(
+                                            id='country_2_dropdown',
+                                            options=ccf.format_dropdown_options(unique_countries),
+                                            placeholder='Search and select a country',
+                                            style={'width': '100%'},
+                                            searchable=True,
+                                            clearable=True
+                                        )
+                                    ]
+                                )
+                            ]
+                        ),
+                        dcc.Graph(id='country_comparison_graph')
+                    ]
                 )
             ]
         )
@@ -311,6 +370,29 @@ def update_correlation(click_data, disorder, indicator):
     return corr_explain[0], corr_explain[1], corr_explain[2], corr_explain[3], corr_explain[4], corr_explain[5]
 
 
+@app.callback(
+    [Output('country_comparison_graph', 'figure'),
+     Output('selected_country_display', 'children')],
+    [Input('disorder_map', 'clickData'),
+     Input('country_2_dropdown', 'value'),
+     Input('slct_disorder', 'value'),
+     Input('slct_indicator', 'value')]
+)
+def update_comparison_graph(click_data, country2, disorder, indicator):
+    if not click_data:
+        return ccf.get_default_comparison_graph(colors), "No country selected"
+    
+    country1 = click_data['points'][0]['location']
+    
+    if not all([country2, disorder, indicator]):
+        return ccf.get_default_comparison_graph(colors), f"Selected country: {country_dict[country1]}"
+    
+    return (
+        ccf.create_country_comparison(
+            mh_data, country1, country2, disorder, indicator, country_dict, colors
+        ),
+        f"Selected country: {country_dict[country1]}"
+    )
 
 if __name__ == '__main__':
     app.run_server(debug=True)
