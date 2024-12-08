@@ -1,5 +1,5 @@
 import plotly.graph_objects as go
-def get_donut_graph(mh_data, country, year):
+def get_donut_graph(mh_data, country, year, colors):
     mental_health_columns = ['schizophrenia', 'depressive_disorder',
                         'anxiety_disorders', 'bipolar_disorders',
                         'eating_disorders']
