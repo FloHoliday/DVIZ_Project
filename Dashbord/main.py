@@ -110,7 +110,18 @@ app.layout = html.Div(
                 
                 # Year Slider box
                 html.Div(id='year-slider-box',
-                    style={'width': '100%', 'margin-bottom':'20px', **smoth_border_style, **std_box_padding, 'box-sizing':'border-box', 'background-color':'white'},
+                    style={
+                        'width': '100%', 
+                        'margin-bottom': '20px', 
+                        **smoth_border_style, 
+                        **std_box_padding, 
+                        'box-sizing': 'border-box', 
+                        'background-color': 'white',
+                        'position': 'sticky',
+                        'top': '20px',
+                        'z-index': '900',
+                        'backdrop-filter': 'blur(8px)',
+                    },
                     children=[
                         dcc.Slider(id='year_slider',
                             min=min(available_years),
