@@ -10,7 +10,7 @@ import corr_explain_functions as ce
 app = Dash(__name__)
 
 # Import mental health data
-mh_data = pd.read_csv('/Users/finneyer/Documents/HSLU/Semester 3/DVIZ/Projektarbeit/DVIZ_Project/mental_health.csv', delimiter=';')
+mh_data = pd.read_csv('mental_health.csv', delimiter=';')
 countries = mh_data.Entity.unique()
 available_years = mh_data['Year'].unique().tolist()
 
