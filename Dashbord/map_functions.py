@@ -237,10 +237,12 @@ def plot_default_map(df):
     - go.Figure: The Plotly figure with default map styling.
     """
     # Add a default color column to ensure all countries are the same color
-    df['default_color'] = 'lightgray'  # Assign a neutral color
+    df_copy = df.copy()
+    df_copy = df_copy[df_copy['Year'] == 1990]
+    df_copy['default_color'] = 'lightgray'  # Assign a neutral color
 
     fig = px.choropleth(
-        df,
+        df_copy,
         locations="Code",  # ISO-3 country codes
         color="default_color",  # Use the default color
         color_discrete_map={'lightgray': 'lightgray'},  # Map lightgray as the color
