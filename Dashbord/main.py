@@ -248,21 +248,60 @@ app.layout = html.Div(
 )
 
 # Map Callback
+# @app.callback(
+#       Output(component_id='disorder_map', component_property='figure'),
+#     [Input(component_id='slct_disorder', component_property='value'),
+#      Input(component_id='slct_indicator', component_property='value'),
+#      Input(component_id='year_slider', component_property='value')]
+# )
+
+# def update_map(disorder, indicator, year):
+#     if not disorder or not indicator:
+#         return cg.get_default_corr_graph(colors)
+    
+#     map_fig = mf.plot_bivariate_map(mh_data_map, disorder, indicator, year,'pink-blue')
+
+#     return map_fig
+
+
 @app.callback(
-      Output(component_id='disorder_map', component_property='figure'),
+    Output(component_id='disorder_map', component_property='figure'),
     [Input(component_id='slct_disorder', component_property='value'),
      Input(component_id='slct_indicator', component_property='value'),
-     Input(component_id='year_slider', component_property='value')]
+     Input(component_id='year_slider', component_property='value'),
+     Input(component_id='disorder_map', component_property='clickData')]
 )
-
-def update_map(disorder, indicator, year):
+def update_map(disorder, indicator, year, click_data):
+    # Generate the base map
     if not disorder or not indicator:
         return cg.get_default_corr_graph(colors)
     
-    map_fig = mf.plot_bivariate_map(mh_data_map, disorder, indicator, year,'pink-blue')
+    map_fig = mf.plot_bivariate_map(mh_data_map, disorder, indicator, year, 'pink-blue')
+
+    # Add red border for the selected country
+    if click_data:
+        selected_country = click_data['points'][0]['location']  # ISO-3 country code
+        print(f"Selected Country: {selected_country}")  # Debugging
+
+        # Overlay a new trace for the selected country
+        map_fig.add_trace(
+            dict(
+                type='choropleth',
+                locationmode='ISO-3',
+                locations=[selected_country],  # Highlight this country
+                z=[1],  # Dummy values
+                colorscale=[[0, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,0)']],  # Transparent fill
+                marker=dict(
+                    line=dict(
+                        color='red',  # Red border
+                        width=3       # Border width
+                    )
+                ),
+                showscale=False  # No color scale needed
+            )
+        )
 
     return map_fig
-
 
 # Correlation graph & donut callback
 @app.callback(
