@@ -135,8 +135,6 @@ app.layout = html.Div(
                         **std_box_padding,
                         'box-sizing': 'border-box',
                         'background-color': 'white',
-                        'position': 'sticky',
-                        'top': '20px',
                         'z-index': '900',
                         'backdrop-filter': 'blur(8px)',
                     },
