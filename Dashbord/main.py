@@ -34,7 +34,7 @@ colors = {
 }
 
 country_code_df = mh_data[['Entity', 'Code']].drop_duplicates()
-country_dict = dict(zip(country_code_df['Code'], country_code_df['Entity']))    
+country_dict = dict(zip(country_code_df['Code'], country_code_df['Entity']))
 
 # Data preparation for the map
 disorders_factors = list(mh_data.columns)[3:]
@@ -46,22 +46,22 @@ app.layout = html.Div(
     id='main-wrapper',
     style={'width' : '100%', 'display': 'flex', 'justify-content':'space-between'},
     children=[
-        
+
         # Selecter sidebar
         html.Div(
             id='selecter-sidebar',
             style={
-                'width' : '20%', 
-                'height' : '100vh', 
-                'position' : 'sticky', 
-                'display':'flex', 
-                'flex-direction':'column', 
+                'width' : '20%',
+                'height' : '100vh',
+                'position' : 'sticky',
+                'display':'flex',
+                'flex-direction':'column',
                 'align-items': 'center',
                 'justify-content':'space-between',
-                'top':'0', 
-                **smoth_border_style, 
-                'background-color':'white', 
-                'padding':'20px', 
+                'top':'0',
+                **smoth_border_style,
+                'background-color':'white',
+                'padding':'20px',
                 'box-sizing': 'border-box'
             },
             children=[
@@ -88,7 +88,7 @@ app.layout = html.Div(
                                 {'label': 'Eating disorders', 'value': 'eating_disorders'}
                             ],
                             multi=False,
-                            placeholder='Select a disorder',  
+                            placeholder='Select a disorder',
                             style={'width': '100%', 'margin': '0 0 5px 0'}
                         ),
                         dcc.Dropdown(id='slct_indicator',
@@ -106,11 +106,11 @@ app.layout = html.Div(
                 html.P('© 2024 Karim, Florian & Finn', id='copyright-text', style={'font-size': '12px'})
             ]
         ),
-        
+
         # Content wrapper
         html.Div(id='content-wrapper',
             style={'width': '80%', 'display': 'flex', 'flex-direction':'column', 'align-items':'center', 'padding':'20px'},
-            children=[  
+            children=[
                 html.Div(id='title-wrapper',
                     style={'background-color': 'white', **smoth_border_style, 'margin': '0 0 20px 0', **std_box_padding},
                     children=[
@@ -125,15 +125,15 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-                
+
                 # Year Slider box
                 html.Div(id='year-slider-box',
                     style={
-                        'width': '100%', 
-                        'margin-bottom': '20px', 
-                        **smoth_border_style, 
-                        **std_box_padding, 
-                        'box-sizing': 'border-box', 
+                        'width': '100%',
+                        'margin-bottom': '20px',
+                        **smoth_border_style,
+                        **std_box_padding,
+                        'box-sizing': 'border-box',
                         'background-color': 'white',
                         'position': 'sticky',
                         'top': '20px',
@@ -150,7 +150,7 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-                
+
                 # Box for the map
                 html.Div(id='map-box',
                     style={'width':'100%', 'margin-bottom': '20px', 'display':'flex', 'justify-content':'space-between'},
@@ -169,7 +169,7 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-                
+
                 # Wrapper for first row after map
                 html.Div(id='disorder-graph-wrapper',
                     style={'width':'100%', 'display':'flex', 'justify-content':'space-between', 'margin': '0 0 20px 0'},
@@ -188,7 +188,7 @@ app.layout = html.Div(
                                     style={**smoth_border_style},
                                     children=[
                                         dcc.Graph(id='disorders_graph',
-                                            style={}  
+                                            style={}
                                         )
                                     ]
                                 )
@@ -247,13 +247,13 @@ app.layout = html.Div(
                                         html.Div(id='correlation-interpretation', style={'width': '100%', 'padding': '10px', 'margin-bottom': '30px'}),
                                         html.Em("Note: Correlation does not imply causation—these relationships are complex and multifaceted.", style={'color': '#666', 'font-size': '14px', 'position':'absolute', 'bottom':'20px', 'left':'20px'})
                                     ]
-                                )  
+                                )
                             ]
                         ),
                     ]
                 ),
-                
-                
+
+
                 # comparison
                 html.Div(id='country-comparison-box',
                     style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'margin-top': '20px', 'padding': '20px', 'box-sizing': 'border-box'},
@@ -278,7 +278,7 @@ app.layout = html.Div(
                                     style={'flex': '1'},
                                     children=[
                                         html.Label("Base Country", style={'margin-bottom': '5px', 'display': 'block', 'font-weight': 'bold'}),
-                                        html.Div(id='selected_country_display', 
+                                        html.Div(id='selected_country_display',
                                             style={
                                                 'padding': '8px 12px',
                                                 'border': '1px solid #e5e7eb',
@@ -309,7 +309,7 @@ app.layout = html.Div(
                 )
             ]
         )
-    ] 
+    ]
 )
 
 # Map Callback
@@ -322,8 +322,9 @@ app.layout = html.Div(
 
 def update_map(disorder, indicator, year):
     if not disorder or not indicator:
-        return cg.get_default_corr_graph(colors)
-    
+        return mf.plot_default_map(mh_data_map)
+        # return cg.get_default_corr_graph(colors)
+
     map_fig = mf.plot_bivariate_map(mh_data_map, disorder, indicator, year,'pink-blue')
 
     return map_fig
@@ -332,6 +333,7 @@ def update_map(disorder, indicator, year):
 # Correlation graph & donut callback
 @app.callback(
      [Output(component_id='disorders_graph', component_property='figure'),
+
       Output(component_id='disorders_donut', component_property='figure')],
     [Input(component_id='slct_disorder', component_property='value'),
      Input(component_id='slct_indicator', component_property='value'),
@@ -340,16 +342,16 @@ def update_map(disorder, indicator, year):
 )
 
 def update_corr_and_donut(disorder, indicator, click_data, year):
-    
+
     if not disorder or not indicator or not click_data:
         return cg.get_default_corr_graph(colors), dg.get_default_donut(colors)
-    
+
     country_code = click_data['points'][0]['location']
     country_name = country_dict[country_code]
     corr_fig = cg.get_corr_graph(mh_data, disorder, indicator, country_code, country_name, colors)
     donut_fig = dg.get_donut_graph(mh_data, country_code, country_name, year, colors)
 
-    return corr_fig, donut_fig    
+    return corr_fig, donut_fig
 
 
 
@@ -372,7 +374,7 @@ def update_correlation(click_data, disorder, indicator):
     country_code = click_data['points'][0]['location']
     country_name = country_dict[country_code]
     corr_explain = ce.get_corr_expl(mh_data, country_code, country_name, disorder, indicator, colors)
-    
+
     return corr_explain[0], corr_explain[1], corr_explain[2], corr_explain[3], corr_explain[4], corr_explain[5]
 
 
@@ -387,12 +389,12 @@ def update_correlation(click_data, disorder, indicator):
 def update_comparison_graph(click_data, country2, disorder, indicator):
     if not click_data:
         return ccf.get_default_comparison_graph(colors), "No country selected"
-    
+
     country1 = click_data['points'][0]['location']
-    
+
     if not all([country2, disorder, indicator]):
         return ccf.get_default_comparison_graph(colors), f"Selected country: {country_dict[country1]}"
-    
+
     return (
         ccf.create_country_comparison(
             mh_data, country1, country2, disorder, indicator, country_dict, colors
@@ -402,9 +404,3 @@ def update_comparison_graph(click_data, country2, disorder, indicator):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-    
-    
-    
-    
-    
-    
