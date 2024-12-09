@@ -34,7 +34,7 @@ colors = {
 }
 
 country_code_df = mh_data[['Entity', 'Code']].drop_duplicates()
-country_dict = dict(zip(country_code_df['Code'], country_code_df['Entity']))
+country_dict = dict(zip(country_code_df['Code'], country_code_df['Entity']))    
 
 # Data preparation for the map
 disorders_factors = list(mh_data.columns)[3:]
@@ -153,9 +153,20 @@ app.layout = html.Div(
                 
                 # Box for the map
                 html.Div(id='map-box',
-                    style={'width':'100%', 'margin-bottom': '20px', **smoth_border_style},
+                    style={'width':'100%', 'margin-bottom': '20px', 'display':'flex', 'justify-content':'space-between'},
                     children=[
-                        dcc.Graph(id='disorder_map')
+                        html.Div(id='map-conainter',
+                            style={'width':'72%', **smoth_border_style},
+                            children=[
+                                dcc.Graph(id='disorder_map')
+                            ]
+                        ),
+                        html.Div(id='donut-box',
+                            style={'width':'26%','background-color':'white', **smoth_border_style},
+                            children=[
+                                dcc.Graph(id='disorders_donut',style={'width':'100%'})
+                            ]
+                        )
                     ]
                 ),
                 
@@ -164,7 +175,7 @@ app.layout = html.Div(
                     style={'width':'100%', 'display':'flex', 'justify-content':'space-between', 'margin': '0 0 20px 0'},
                     children=[
                         html.Div(id='graph1-container',
-                            style={'width':'69%'},
+                            style={'width':'72%'},
                             children=[
                                 html.Div(id='disorder-graph-text-box',
                                     style={'width':'100%','background-color': 'white', 'margin-bottom':'10px', **smoth_border_style,'padding':'0 20px 0 20px'},
@@ -183,70 +194,65 @@ app.layout = html.Div(
                                 )
                             ]
                         ),
-                        html.Div(id='donut-box',
-                            style={'width':'29%','background-color':'white', **smoth_border_style},
+                        # Correlation Analysis Section
+                        html.Div(id='correlation-box',
+                            style={'width': '26%', 'background-color': 'white', **smoth_border_style, 'padding': '20px', 'box-sizing': 'border-box', 'position':'relative'},
                             children=[
-                                dcc.Graph(id='disorders_donut',style={'width':'100%'})
-                            ]
-                        )
-                    ]
-                ),
-                # Correlation Analysis Section
-                html.Div(id='correlation-box',
-                    style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'padding': '20px', 'box-sizing': 'border-box'},
-                    children=[
-                        html.H3('Correlation Analysis', style={'margin-bottom': '15px'}),
-                        html.Div(id='correlation-content',
-                            style={'display': 'flex', 'align-items': 'center', 'justify-content': 'space-between'},
-                            children=[
-                                # Left section - Correlation coefficient
-                                html.Div(style={'width': '30%', 'text-align': 'center'},
+                                html.H3('Correlation Analysis', style={'margin-bottom': '15px'}),
+                                html.Div(id='correlation-content',
+                                    style={'display': 'flex', 'align-items': 'center', 'justify-content': 'space-between', 'flex-direction':'column'},
                                     children=[
-                                        html.H2(id='correlation-value',
-                                            style={'font-size': '48px', 'margin': '0', 'font-weight': 'bold'}
-                                        ),
-                                        html.P(id='correlation-label',
-                                            style={'margin': '5px 0', 'color': '#666'}
-                                        )
-                                    ]
-                                ),
-                                # Center section - Strength bar
-                                html.Div(style={'width': '40%'},
-                                    children=[
-                                        html.Div(style={'margin-bottom': '5px'},
+                                        # Left section - Correlation coefficient
+                                        html.Div(style={'width': '100%', 'text-align': 'center', 'margin-bottom': '30px'},
                                             children=[
-                                                html.Span("Correlation Strength", style={'color': '#666'}),
-                                                html.Span(id='strength-label',
-                                                    style={'float': 'right', 'font-weight': 'bold'}
+                                                html.H2(id='correlation-value',
+                                                    style={'font-size': '48px', 'margin': '0', 'font-weight': 'bold'}
+                                                ),
+                                                html.P(id='correlation-label',
+                                                    style={'margin': '5px 0', 'color': '#666'}
                                                 )
                                             ]
                                         ),
-                                        html.Div(style={
-                                            'width': '100%',
-                                            'height': '10px',
-                                            'background-color': '#f3f4f6',
-                                            'border-radius': '5px',
-                                            'overflow': 'hidden'
-                                        },
+                                        # Center section - Strength bar
+                                        html.Div(style={'width': '100%', 'margin-bottom': '30px'},
                                             children=[
-                                                html.Div(id='strength-bar',
-                                                    style={
-                                                        'height': '100%',
-                                                        'width': '0%',
-                                                        'transition': 'width 0.5s ease-in-out'
-                                                    }
+                                                html.Div(style={'margin-bottom': '5px'},
+                                                    children=[
+                                                        html.Span("Correlation Strength", style={'color': '#666'}),
+                                                        html.Span(id='strength-label',
+                                                            style={'float': 'right', 'font-weight': 'bold'}
+                                                        )
+                                                    ]
+                                                ),
+                                                html.Div(style={
+                                                    'width': '100%',
+                                                    'height': '10px',
+                                                    'background-color': '#f3f4f6',
+                                                    'border-radius': '5px',
+                                                    'overflow': 'hidden'
+                                                },
+                                                    children=[
+                                                        html.Div(id='strength-bar',
+                                                            style={
+                                                                'height': '100%',
+                                                                'width': '0%',
+                                                                'transition': 'width 0.5s ease-in-out'
+                                                            }
+                                                        )
+                                                    ]
                                                 )
                                             ]
-                                        )
+                                        ),
+                                        # Right section - Interpretation
+                                        html.Div(id='correlation-interpretation', style={'width': '100%', 'padding': '10px', 'margin-bottom': '30px'}),
+                                        html.Em("Note: Correlation does not imply causation—these relationships are complex and multifaceted.", style={'color': '#666', 'font-size': '14px', 'position':'absolute', 'bottom':'20px', 'left':'20px'})
                                     ]
-                                ),
-                                # Right section - Interpretation
-                                html.Div(id='correlation-interpretation', style={'width': '25%', 'padding': '10px', 'border-left': '2px solid #f3f4f6'})
+                                )  
                             ]
                         ),
-                        html.Em("Note: Correlation does not imply causation—these relationships are complex and multifaceted.", style={'color': '#666', 'font-size': '14px'})
                     ]
                 ),
+                
                 
                 # comparison
                 html.Div(id='country-comparison-box',
