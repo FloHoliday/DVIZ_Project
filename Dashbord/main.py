@@ -100,6 +100,11 @@ app.layout = html.Div(
                             multi=False,
                             placeholder='Select an indicator',
                             style={'width': '100%'}
+                        ),
+                        html.H4("Selected country", style={'margin': '50px 0 20px 0'}),
+                        html.Img(id='selected-flag',
+                            style={'width':'100%'},
+                            src='https://flagcdn.com/w160/xx.png'  # Default blank flag
                         )
                     ]
                 ),
@@ -321,6 +326,22 @@ def update_map(disorder, indicator, year):
     map_fig = mf.plot_bivariate_map(mh_data_map, disorder, indicator, year,'pink-blue')
 
     return map_fig
+
+
+@app.callback(
+    Output('selected-flag', 'src'),
+    Input('disorder_map', 'clickData')
+)
+
+def update_flag(click_data):
+    if not click_data:
+        # Return a default flag or empty image when no country is selected
+        return 'https://flagcdn.com/w160/xx.png'  # xx is a blank flag
+    
+    country_code = click_data['points'][0]['location']
+    # Convert 3-letter code to 2-letter code using your existing function
+    two_letter_code = ccf.three_to_two_letter_code(country_code)
+    return f'https://flagcdn.com/w160/{two_letter_code}.png'
 
 
 # Correlation graph & donut callback

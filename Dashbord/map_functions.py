@@ -170,57 +170,91 @@ def add_bivariate_legend(fig, x_legend, y_legend, colors, conf=None):
 
     return fig
 
-
-def plot_bivariate_map(df, disorder, factor, year,color_set_name):
-    """
-    Plot a bivariate choropleth map based on classifications.
-
-    Parameters:
-    - df (pd.DataFrame): The DataFrame with classification and color data.
-    - disorder (str): The disorder to classify.
-    - factor (str): The factor to classify.
-    - color_set_name (str): The name of the color set to use (e.g., 'pink-blue').
-    - color_sets (dict): A dictionary of color sets.
-
-    Returns:
-    - go.Figure: The Plotly figure.
-    """
-    
+def plot_bivariate_map(df, disorder, factor, year, color_set_name):
     df_year = df[df['Year'] == year]
     
-    # Select the color set
+    # Select the color set and create color mapping (previous code remains the same)
     color_sets = get_map_color_sets()
     colors = color_sets[color_set_name]
-
-    # Create a color mapping
     color_mapping = create_bivariate_color_mapping(colors)
-
-    # Assign colors to countries
-    df = assign_bivariate_colors(df_year, disorder, factor, color_mapping)
+    df_year = assign_bivariate_colors(df_year, disorder, factor, color_mapping)
 
     # Create the choropleth map
     fig = px.choropleth(
-        df,
-        locations="Code",  # ISO-3 country codes
-        color="color",  # Column with the assigned bivariate colors
-        hover_data={
-        disorder: ':.2f',  # Show disorder value with 2 decimal places
-        factor: ':.2f',    # Show factor value with 2 decimal places
-        "Code": True},   # Optionally hide the country code,  # Country names for hover info
+        df_year,
+        locations="Code",
+        color="color",
+        custom_data=["Entity"],
         title=f"Bivariate Map of {disorder.replace('_', ' ').title()} and {factor.replace('_', ' ').title()}",
-        color_discrete_map="identity"  # Use exact color mapping from the DataFrame
+        color_discrete_map="identity"
     )
 
-    # Update the map layout
+    # Update hover template (previous code remains the same)
+    fig.update_traces(
+        hovertemplate='<b>%{customdata[0]}</b><extra></extra>',
+        hoverlabel=dict(
+            bgcolor='white',
+            font_size=14,
+            font_color="black",
+            font_family="Open Sans",
+            bordercolor='#d3d3d3',
+            namelength=0
+        )
+    )
+
+    # Update the geo layout to fill the container
     fig.update_geos(
         showcoastlines=True,
         coastlinecolor="Black",
         showland=True,
         landcolor="lightgray",
+        showcountries=True,
+        countrycolor="Black",
+        fitbounds="locations",  # This ensures the map fits the container
+        visible=True,
+        projection=dict(
+            type='equirectangular',
+        ),
     )
-    fig.update_layout(margin={"r": 0, "t": 30, "l": 0, "b": 0})
 
-    # Add the bivariate legend
-    add_bivariate_legend(fig, factor.replace('_', ' ').title() ,disorder.replace('_', ' ').title(), colors)
+    # Update layout settings
+    fig.update_layout(
+        margin={"r": 0, "t": 30, "l": 0, "b": 0},
+        height=500,  # Set a fixed height
+        geo=dict(
+            scope='world',
+            showframe=False,
+            projection_type='equirectangular',
+            # Set the bounds to show the entire world without extra space
+            lonaxis=dict(
+                range=[-180, 180],
+                showgrid=False
+            ),
+            lataxis=dict(
+                range=[-60, 85],  # Adjusted to avoid stretching at poles
+                showgrid=False
+            )
+        ),
+        # Configure the modebar
+        modebar=dict(
+            orientation='v',
+            remove=[
+                'pan',
+                'lasso2d',
+                'select2d',
+                'autoScale2d',
+            ]
+        )
+    )
+
+    add_bivariate_legend(fig, factor.replace('_', ' ').title(), disorder.replace('_', ' ').title(), colors)
+
+    # Add configuration to control zoom behavior
+    fig.update_layout(
+        dragmode='zoom',
+        clickmode='event+select'
+    )
 
     return fig
+
+
