@@ -61,6 +61,10 @@ def create_country_comparison(df, country_code1, country_code2, disorder, indica
     # Filter data for each country
     country1_data = df[df['Code'] == country_code1].sort_values('Year')
     country2_data = df[df['Code'] == country_code2].sort_values('Year')
+    country1_data[indicator] = (country1_data[indicator] - country1_data[indicator].min()) / (country1_data[indicator].max() - country1_data[indicator].min())
+    country1_data[disorder] = (country1_data[disorder] - country1_data[disorder].min()) / (country1_data[disorder].max() - country1_data[disorder].min())
+    country2_data[indicator] = (country2_data[indicator] - country2_data[indicator].min()) / (country2_data[indicator].max() - country2_data[indicator].min())
+    country2_data[disorder] = (country2_data[disorder] - country2_data[disorder].min()) / (country2_data[disorder].max() - country2_data[disorder].min())
     
     # Add traces for both countries
     for country_data, country_code, line_color, dash_color in [
@@ -114,15 +118,15 @@ def create_country_comparison(df, country_code1, country_code2, disorder, indica
         showgrid=True, 
         gridwidth=1, 
         gridcolor='#f0f0f0',
-        title_text=disorder.replace('_', ' ').title(), 
-        secondary_y=False
+        secondary_y=False,
+        showticklabels=False
     )
     fig.update_yaxes(
         showgrid=True, 
         gridwidth=1, 
         gridcolor='#f0f0f0',
-        title_text=indicator.replace('_', ' ').title(), 
-        secondary_y=True
+        secondary_y=True,
+        showticklabels=False
     )
     
     return fig
