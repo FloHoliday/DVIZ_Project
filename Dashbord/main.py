@@ -251,19 +251,42 @@ app.layout = html.Div(
                     ]
                 ),
 
-
                 # comparison
                 html.Div(id='country-comparison-box',
-                    style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'margin-top': '20px', 'padding': '20px', 'box-sizing': 'border-box'},
+                    style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'margin-top': '20px', 'padding': '20px', 'box-sizing': 'border-box', 'position':'relative'},
                     children=[
                         # Title and description section
                         html.Div(
                             style={'margin-bottom': '20px'},
                             children=[
                                 html.H3('Country Comparison', style={'margin-bottom': '8px'}),
-                                html.P(
-                                    'Compare mental health indicators and societal factors between two countries to identify patterns and correlations.',
-                                    style={'color': '#666', 'margin': '0'}
+                                html.Div(id='comparison-desc-box',
+                                    style={'display':'flex', 'justify-content':'space-between'},
+                                    children=[
+                                        html.P(
+                                            'Compare mental health indicators and societal factors between two countries to identify patterns and correlations. All data are normalized in order to make visual correlations in the curves optimally recognizable.',
+                                            style={'color': '#666', 'margin': '0', 'width': '96%'}
+                                        ),
+                                        html.Div(id='questionmark-box',
+                                            style={'width': '3%','display':'flex', 'justify-content':'center', 'align-items':'center', 'cursor':'pointer'},
+                                            children=[
+                                                html.Div(id='questionmark-hover-box',
+                                                    style={'position':'absolute', 'top':'120px', 'right':'15px', 'width': '50%', 'background-color':'white', 'z-index':'50', **smoth_border_style, 'padding': '20px'},
+                                                    children=[
+                                                        html.H3('Information about Normalized Data', style={'margin-top':'0'}),
+                                                        html.P('The data displayed in the graph is normalized, meaning that all values have been scaled to enable better visual comparison between the countries. This approach helps to highlight patterns and potential correlations between the curves. However, it is important to note that the normalized data does not represent actual values of the indicators or the mental disorders. Instead, it illustrates relative trends and behaviors, allowing for the identification of similarities in dynamics between the selected countries.', style={'margin-bottom':'0'})    
+                                                    ],
+                                                    className='hidden'
+                                                ),
+                                                html.Div(
+                                                    style={'height':'20px', 'width': '20px'},
+                                                    children=[
+                                                        html.P('?', style={'margin':'0', 'height': '20px', 'width':'20px', 'text-align':'center', 'line-height': '20px', 'color': 'white', 'background-color':'black', 'border-radius': '30px', 'font-size':'.8em'})
+                                                    ]
+                                                )
+                                            ]         
+                                        )
+                                    ]
                                 )
                             ]
                         ),
