@@ -314,9 +314,3 @@ def update_correlation(click_data, disorder, indicator):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-    
-    
-    
-    
-    
-    
