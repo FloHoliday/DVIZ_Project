@@ -274,7 +274,7 @@ app.layout = html.Div(
                                                     style={'position':'absolute', 'top':'120px', 'right':'15px', 'width': '50%', 'background-color':'white', 'z-index':'50', **smoth_border_style, 'padding': '20px'},
                                                     children=[
                                                         html.H3('Information about Normalized Data', style={'margin-top':'0'}),
-                                                        html.P('The data displayed in the graph is normalized, meaning that all values have been scaled to enable better visual comparison between the countries. This approach helps to highlight patterns and potential correlations between the curves. However, it is important to note that the normalized data does not represent actual values of the indicators or the mental disorders. Instead, it illustrates relative trends and behaviors, allowing for the identification of similarities in dynamics between the selected countries.', style={'margin-bottom':'0'})    
+                                                        html.P('The data displayed in the graph is normalized, meaning that all values have been scaled to enable better visual comparison between the countries. This approach helps to highlight patterns and potential correlations between the curves. However, it is important to note that the normalized data does not represent actual values of the indicators or the mental disorders. Instead, it illustrates relative trends and behaviors, allowing for the identification of similarities in dynamics between the selected countries.', style={'margin-bottom':'0'})
                                                     ],
                                                     className='hidden'
                                                 ),
@@ -284,7 +284,7 @@ app.layout = html.Div(
                                                         html.P('?', style={'margin':'0', 'height': '20px', 'width':'20px', 'text-align':'center', 'line-height': '20px', 'color': 'white', 'background-color':'black', 'border-radius': '30px', 'font-size':'.8em'})
                                                     ]
                                                 )
-                                            ]         
+                                            ]
                                         )
                                     ]
                                 )
@@ -338,15 +338,38 @@ app.layout = html.Div(
       Output(component_id='disorder_map', component_property='figure'),
     [Input(component_id='slct_disorder', component_property='value'),
      Input(component_id='slct_indicator', component_property='value'),
-     Input(component_id='year_slider', component_property='value')]
+     Input(component_id='year_slider', component_property='value'),
+     Input(component_id='disorder_map', component_property='clickData')
+     ]
 )
 
-def update_map(disorder, indicator, year):
+def update_map(disorder, indicator, year, click_data):
     if not disorder or not indicator:
         return mf.plot_default_map(mh_data_map)
-        # return cg.get_default_corr_graph(colors)
 
-    map_fig = mf.plot_bivariate_map(mh_data_map, disorder, indicator, year,'pink-blue')
+    clicked_country = None
+    if click_data and 'points' in click_data and len(click_data['points']) > 0:
+        clicked_country = click_data['points'][0].get('location')
+        print(clicked_country)
+
+
+        country_data = mh_data_map[(mh_data_map['Code'] == clicked_country) & (mh_data_map['Year'] == year)]
+
+        if not country_data.empty:
+            print("\nCountry Data for Year", year)
+            print("------------------------")
+            print(country_data.iloc[0].to_string())
+        else:
+            print(f"No data found for country {clicked_country} in year {year}")
+
+
+    map_fig = mf.plot_bivariate_map(
+        mh_data_map, disorder,
+        indicator,
+        year,
+        color_set_name='pink-blue-2',
+        highlight_country=clicked_country
+        )
 
     return map_fig
 

@@ -2,54 +2,106 @@
 import pandas as pd
 import plotly.express as px
 
-def classify_disorders(df, disorders_factors):
+
+
+def normalize_and_classify(df, column):
     """
-    Classify the values of multiple disorders into categories 'A', 'B', or 'C' based on their percentage.
+    Normalize a column by its country-specific range and classify the values.
 
     Parameters:
-    df (pd.DataFrame): The input DataFrame.
-    disorders (list): A list of disorder column names to process.
+    df (pd.DataFrame): The input DataFrame containing the data
+    column (str): The column name to process
 
     Returns:
-    None: The function directly modifies the given DataFrame.
+    pd.Series: A Series containing the classification categories
     """
-    # Create a copy of the DataFrame to avoid SettingWithCopyWarning
-    df_copy = df.copy()
+    # Calculate the minimum and maximum values per country
+    country_min = df.groupby('Code')[column].transform('min')
+    country_max = df.groupby('Code')[column].transform('max')
 
-    for disorder in disorders_factors:
-        classification_column = f"{disorder}_classification"
-        max_value = df_copy[disorder].max()
+    # Calculate the range for each country
+    country_range = country_max - country_min
 
-        # Use .loc to safely assign values to a new column
-        df.loc[:, classification_column] = df_copy[disorder].apply(
-            lambda x: classify_percentage((x / max_value) * 100 if pd.notna(x) else None)
-        )
+    # Create a mask for valid calculations (where we have a meaningful range)
+    valid_mask = (country_range > 1e-10) & (~country_range.isna())
 
-    return df
+    # Initialize classification with None
+    classification = pd.Series([None] * len(df), index=df.index)
+
+    # For valid entries, calculate where each value falls in its country's range
+    normalized = (df.loc[valid_mask, column] - country_min[valid_mask]) / country_range[valid_mask] * 100
+
+    # Assign classifications based on normalized values
+    classification.loc[valid_mask] = normalized.apply(classify_percentage)
+
+    return classification
+
+
+def classify_disorders(df, columns_to_classify):
+    """
+    Classify multiple columns into categories 'A', 'B', or 'C' based on
+    their position within each country's range of values.
+
+    Parameters:
+    df (pd.DataFrame): The input DataFrame containing the data
+    columns_to_classify (list): List of column names to process
+
+    Returns:
+    pd.DataFrame: DataFrame with added classification columns
+    """
+    # Create a copy to avoid modifying the original DataFrame
+    result_df = df.copy()
+
+    for column in columns_to_classify:
+        classification_column = f"{column}_classification"
+        result_df[classification_column] = normalize_and_classify(result_df, column)
+
+    return result_df
+
 
 def classify_percentage(percentage):
     """
-    Classify a given percentage into one of three categories: 'A', 'B', or 'C'.
+    Classify a value based on where it falls within its range.
 
     Parameters:
-    percentage (float): The input percentage to be classified.
+    percentage (float): The normalized value (0-100) to be classified
 
     Returns:
-    str: A single character representing the classification ('A', 'B', or 'C').
+    str: Classification category ('A', 'B', or 'C')
     """
-    if percentage is None:  # Handle NaN values
+    if percentage is None or pd.isna(percentage):
         return None
-    elif percentage < 100 / 3:
+    elif percentage < 33.33:  # Bottom third of the range
         return 'A'
-    elif percentage < 100 * 2 / 3:
+    elif percentage < 66.67:  # Middle third of the range
         return 'B'
-    else:
+    else:  # Top third of the range
         return 'C'
 
 
 def get_map_color_sets():
-    color_sets = {
-        'pink-blue':   ['#e8e8e8', '#ace4e4', '#5ac8c8', '#dfb0d6', '#a5add3', '#5698b9', '#be64ac', '#8c62aa', '#3b4994'],
+    color_sets = {'pink-blue': [
+    '#e8e8e8',  # Light Gray (Bottom-left: Low disorder, Low indicator )
+    '#ace4e4',  # Pale Aqua (Bottom-center: Low , Medium )
+    '#5ac8c8',  # Bright Teal (Bottom-right: Low , High)
+    '#dfb0d6',  # Soft Pink (Middle-left: Medium , Low)
+    '#a5add3',  # Periwinkle (Middle-center: Medium , Medium )
+    '#5698b9',  # Sky Blue (Middle-right: Medium , High)
+    '#be64ac',  # Orchid (Top-left: High , Low )
+    '#8c62aa',  # Violet (Top-center: High , Medium)
+    '#3b4994'   # Navy Blue (Top-right: High , High)
+],
+                  'pink-blue-2': [
+    '#f4f799',  # Light Gray (Bottom-left: Low disorder, Low indicator) old #f0f0f0
+    '#89d3d3',  # Aqua (Bottom-center: Low disorder, Medium indicator)
+    '#2ca3a3',  # Deep Teal (Bottom-right: Low disorder, High indicator)
+    '#e8a3cc',  # Blush Pink (Middle-left: Medium disorder, Low indicator)
+    '#a983d5',  # Lavender (Middle-center: Medium disorder, Medium indicator)
+    '#416eb7',  # Rich Blue (Middle-right: Medium disorder, High indicator)
+    '#d96ba8',  # Magenta (Top-left: High disorder, Low indicator)
+    '#9a52c2',  # Amethyst (Top-center: High disorder, Medium indicator)
+    '#2f3b99'   # Deep Navy (Top-right: High disorder, High indicator)
+],
         'teal-red':    ['#e8e8e8', '#e4acac', '#c85a5a', '#b0d5df', '#ad9ea5', '#985356', '#64acbe', '#627f8c', '#574249'],
         'blue-organe': ['#fef1e4', '#fab186', '#f3742d',  '#97d0e7', '#b0988c', '#ab5f37', '#18aee5', '#407b8f', '#5c473d']
     }
@@ -58,24 +110,52 @@ def get_map_color_sets():
 
 def create_bivariate_color_mapping(colors):
     return {
-        ('A', 'A'): colors[0],  # Bottom-left
-        ('B', 'A'): colors[1],  # Middle-left
-        ('C', 'A'): colors[2],  # Top-left
-        ('A', 'B'): colors[3],  # Bottom-center
-        ('B', 'B'): colors[4],  # Center
-        ('C', 'B'): colors[5],  # Top-center
-        ('A', 'C'): colors[6],  # Bottom-right
-        ('B', 'C'): colors[7],  # Middle-right
-        ('C', 'C'): colors[8],  # Top-right
+        ('A', 'A'): colors[0],
+        ('A', 'B'): colors[1],
+        ('A', 'C'): colors[2],
+        ('B', 'A'): colors[3],
+        ('B', 'B'): colors[4],
+        ('B', 'C'): colors[5],
+        ('C', 'A'): colors[6],
+        ('C', 'B'): colors[7],
+        ('C', 'C'): colors[8],
     }
 
 
+def get_color_for_row(row, disorder, factor, color_mapping):
+    """
+    Get the appropriate color for a row based on its disorder and factor classifications.
+
+    Parameters:
+    row (pd.Series): A single row from the DataFrame
+    disorder (str): Name of the disorder column
+    factor (str): Name of the factor column
+    color_mapping (dict): Dictionary mapping classification pairs to colors
+
+    Returns:
+    str: Color value from the mapping, or 'gray' if no matching classification
+    """
+    disorder_class = row[f"{disorder}_classification"]
+    factor_class = row[f"{factor}_classification"]
+    return color_mapping.get((disorder_class, factor_class), 'gray')
+
+
 def assign_bivariate_colors(df, disorder, factor, color_mapping):
+    """
+    Assign colors to each row in the DataFrame based on disorder and factor classifications.
+
+    Parameters:
+    df (pd.DataFrame): Input DataFrame with classification columns
+    disorder (str): Name of the disorder to use
+    factor (str): Name of the factor to use
+    color_mapping (dict): Dictionary mapping classification pairs to colors
+
+    Returns:
+    pd.DataFrame: DataFrame with added 'color' column
+    """
     df['color'] = df.apply(
-        lambda row: color_mapping.get(
-            (row[f"{disorder}_classification"], row[f"{factor}_classification"]),
-            'gray'  # Default color if classification is missing
-        ),
+        get_color_for_row,
+        args=(disorder, factor, color_mapping),
         axis=1
     )
     return df
@@ -171,7 +251,7 @@ def add_bivariate_legend(fig, x_legend, y_legend, colors, conf=None):
     return fig
 
 
-def plot_bivariate_map(df, disorder, factor, year,color_set_name):
+def plot_bivariate_map(df, disorder, factor, year, color_set_name, highlight_country=None):
     """
     Plot a bivariate choropleth map based on classifications.
 
@@ -180,13 +260,12 @@ def plot_bivariate_map(df, disorder, factor, year,color_set_name):
     - disorder (str): The disorder to classify.
     - factor (str): The factor to classify.
     - color_set_name (str): The name of the color set to use (e.g., 'pink-blue').
-    - color_sets (dict): A dictionary of color sets.
+    - highlight_country (str, optional): ISO-3 country code to highlight
 
     Returns:
     - go.Figure: The Plotly figure.
     """
-
-    df_year = df[df['Year'] == year]
+    df_year = df[df['Year'] == year].copy()
 
     # Select the color set
     color_sets = get_map_color_sets()
@@ -198,17 +277,20 @@ def plot_bivariate_map(df, disorder, factor, year,color_set_name):
     # Assign colors to countries
     df = assign_bivariate_colors(df_year, disorder, factor, color_mapping)
 
-    # Create the choropleth map
+    # Create the base choropleth map
     fig = px.choropleth(
         df,
-        locations="Code",  # ISO-3 country codes
-        color="color",  # Column with the assigned bivariate colors
+        locations="Code",
+        color="color",
         hover_data={
-        disorder: ':.2f',  # Show disorder value with 2 decimal places
-        factor: ':.2f',    # Show factor value with 2 decimal places
-        "Code": True},   # Optionally hide the country code,  # Country names for hover info
+            'Entity': True,
+            #disorder: ':.2f',
+            #factor: ':.2f',
+            "Code": False
+
+        },
         title=f"Bivariate Map of {disorder.replace('_', ' ').title()} and {factor.replace('_', ' ').title()}",
-        color_discrete_map="identity"  # Use exact color mapping from the DataFrame
+        color_discrete_map="identity"
     )
 
     # Update the map layout
@@ -217,14 +299,36 @@ def plot_bivariate_map(df, disorder, factor, year,color_set_name):
         coastlinecolor="Black",
         showland=True,
         landcolor="lightgray",
+        fitbounds="locations"
     )
+
+    if highlight_country:
+        print(f"highlighted country: {highlight_country}")
+
+        # Create a new trace specifically for the highlighted country
+        highlighted_df = df[df['Code'] == highlight_country]
+
+        fig.add_choropleth(
+            locations=[highlight_country],
+            z=[1],  # Dummy value
+            colorscale=[[0, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,0)']],  # Transparent fill
+            showscale=False,
+            hoverinfo='skip',
+            marker=dict(
+                line=dict(
+                    color='orange',
+                    width=2
+                )
+            )
+        )
+
     fig.update_layout(margin={"r": 0, "t": 30, "l": 0, "b": 0})
+    fig.update_layout(showlegend=False)
 
     # Add the bivariate legend
-    add_bivariate_legend(fig, factor.replace('_', ' ').title() ,disorder.replace('_', ' ').title(), colors)
+    add_bivariate_legend(fig, factor.replace('_', ' ').title(), disorder.replace('_', ' ').title(), colors)
 
     return fig
-
 
 def plot_default_map(df):
     """
@@ -250,13 +354,16 @@ def plot_default_map(df):
         title="Default Map (Select a Country to Highlight)"
     )
 
-    # Update the map layout
+    #Update the map layout
     fig.update_geos(
         showcoastlines=True,
         coastlinecolor="Black",
         showland=True,
         landcolor="white",  # Set the land to white for a clean background
     )
+
+
+
     fig.update_layout(
         margin={"r": 0, "t": 30, "l": 0, "b": 0},
         showlegend=False,
