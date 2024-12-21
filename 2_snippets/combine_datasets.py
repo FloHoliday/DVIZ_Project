@@ -1,3 +1,5 @@
+import os
+import time
 import pandas as pd
 
 def reshape_dataset(file_path, value_name):
@@ -6,7 +8,7 @@ def reshape_dataset(file_path, value_name):
     df = pd.read_csv(file_path, sep=';')
     
     # Identify year columns
-    year_columns = [col for col in df.columns if str(col).isnumeric() and 1960 <= int(col) <= 2023]
+    year_columns = [col for col in df.columns if str(col).isnumeric() and 1990 <= int(col) <= 2023]
     
     # Melt the dataframe to convert years from columns to rows
     melted = pd.melt(
@@ -25,39 +27,27 @@ try:
     # Read the main dataset with semicolon separator
     print("Reading mental health dataset...")
     mental_health = pd.read_csv('mental_health.csv', sep=';')
+    print(os.listdir())
 
-    # Process and merge unemployment data
-    print("Processing unemployment data...")
-    unemployment = reshape_dataset('unemployment_rate.csv', 'unemployment_rate')
-    mental_health = pd.merge(
-        mental_health,
-        unemployment,
-        left_on=['Code', 'Year'],
-        right_on=['Country Code', 'Year'],
-        how='left'
-    )
+    
+    csv_files = [f for f in os.listdir() if f.endswith('.csv') and f != 'mental_health.csv']
 
-    # Process and merge CO2 emissions data
-    print("Processing CO2 emissions data...")
-    co2 = reshape_dataset('co2_emissions.csv', 'co2_emissions')
-    mental_health = pd.merge(
-        mental_health,
-        co2,
-        left_on=['Code', 'Year'],
-        right_on=['Country Code', 'Year'],
-        how='left'
-    )
+    for csv_file in csv_files:
+        feature_name = csv_file.replace('.csv', '')
+        print(f"Processing {feature_name} data...")
+        
+        data = reshape_dataset(csv_file, feature_name)
+        mental_health = pd.merge(
+            mental_health,
+            data,
+            left_on=['Code', 'Year'],
+            right_on=['Country Code', 'Year'],
+            how='left',
+            suffixes=('', '_drop')
+        )
 
-    # Process and merge GDP data
-    print("Processing GDP data...")
-    gdp = reshape_dataset('gdp.csv', 'gdp')
-    mental_health = pd.merge(
-        mental_health,
-        gdp,
-        left_on=['Code', 'Year'],
-        right_on=['Country Code', 'Year'],
-        how='left'
-    )
+    columns_to_drop = [col for col in mental_health.columns if col.endswith('_drop')]
+    mental_health = mental_health.drop(columns=columns_to_drop)
 
     # Clean up duplicate Country Code columns
     columns_to_drop = [col for col in mental_health.columns if col.endswith('Country Code')]
