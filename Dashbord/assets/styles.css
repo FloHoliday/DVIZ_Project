@@ -12,3 +12,15 @@ body{
     margin: 0;
     background-color: #f5f6fc;
 }
+
+
+#questionmark-box:hover #questionmark-hover-box{
+    visibility: visible;
+    opacity: 1;
+}
+
+.hidden{
+    visibility: hidden;
+}
+
+

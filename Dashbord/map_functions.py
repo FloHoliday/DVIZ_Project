@@ -24,7 +24,7 @@ def classify_disorders(df, disorders_factors):
         df.loc[:, classification_column] = df_copy[disorder].apply(
             lambda x: classify_percentage((x / max_value) * 100 if pd.notna(x) else None)
         )
-    
+
     return df
 
 def classify_percentage(percentage):
@@ -68,8 +68,8 @@ def create_bivariate_color_mapping(colors):
         ('B', 'C'): colors[7],  # Middle-right
         ('C', 'C'): colors[8],  # Top-right
     }
-    
-    
+
+
 def assign_bivariate_colors(df, disorder, factor, color_mapping):
     df['color'] = df.apply(
         lambda row: color_mapping.get(
@@ -185,9 +185,9 @@ def plot_bivariate_map(df, disorder, factor, year,color_set_name):
     Returns:
     - go.Figure: The Plotly figure.
     """
-    
+
     df_year = df[df['Year'] == year]
-    
+
     # Select the color set
     color_sets = get_map_color_sets()
     colors = color_sets[color_set_name]
@@ -222,5 +222,44 @@ def plot_bivariate_map(df, disorder, factor, year,color_set_name):
 
     # Add the bivariate legend
     add_bivariate_legend(fig, factor.replace('_', ' ').title() ,disorder.replace('_', ' ').title(), colors)
+
+    return fig
+
+
+def plot_default_map(df):
+    """
+    Plot a default choropleth map without any bivariate coloring.
+
+    Parameters:
+    - df (pd.DataFrame): The DataFrame with country data.
+
+    Returns:
+    - go.Figure: The Plotly figure with default map styling.
+    """
+    # Add a default color column to ensure all countries are the same color
+    df_copy = df.copy()
+    df_copy = df_copy[df_copy['Year'] == 1990]
+    df_copy['default_color'] = 'lightgray'  # Assign a neutral color
+
+    fig = px.choropleth(
+        df_copy,
+        locations="Code",  # ISO-3 country codes
+        color="default_color",  # Use the default color
+        color_discrete_map={'lightgray': 'lightgray'},  # Map lightgray as the color
+        hover_data={"Code": True, 'default_color': False},
+        title="Default Map (Select a Country to Highlight)"
+    )
+
+    # Update the map layout
+    fig.update_geos(
+        showcoastlines=True,
+        coastlinecolor="Black",
+        showland=True,
+        landcolor="white",  # Set the land to white for a clean background
+    )
+    fig.update_layout(
+        margin={"r": 0, "t": 30, "l": 0, "b": 0},
+        showlegend=False,
+    )
 
     return fig

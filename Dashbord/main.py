@@ -5,6 +5,7 @@ import corr_graph_functions as cg
 import map_functions as mf
 import donut_graph_functions as dg
 import corr_explain_functions as ce
+import country_comparison_functions as ccf
 
 
 app = Dash(__name__)
@@ -13,6 +14,10 @@ app = Dash(__name__)
 mh_data = pd.read_csv('mental_health.csv', delimiter=';')
 countries = mh_data.Entity.unique()
 available_years = mh_data['Year'].unique().tolist()
+
+# Filter out nulls first, then remove duplicates
+filtered_data = mh_data[mh_data["Code"].notna()]
+unique_countries = filtered_data[["Entity", "Code"]].drop_duplicates()
 
 smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(0, 0, 0, 0.13) 0px 1px 4px', 'overflow':'hidden'}
 std_box_padding = {'padding': '20px'}
@@ -41,22 +46,22 @@ app.layout = html.Div(
     id='main-wrapper',
     style={'width' : '100%', 'display': 'flex', 'justify-content':'space-between'},
     children=[
-        
+
         # Selecter sidebar
         html.Div(
             id='selecter-sidebar',
             style={
-                'width' : '20%', 
-                'height' : '100vh', 
-                'position' : 'sticky', 
-                'display':'flex', 
-                'flex-direction':'column', 
+                'width' : '20%',
+                'height' : '100vh',
+                'position' : 'sticky',
+                'display':'flex',
+                'flex-direction':'column',
                 'align-items': 'center',
                 'justify-content':'space-between',
-                'top':'0', 
-                **smoth_border_style, 
-                'background-color':'white', 
-                'padding':'20px', 
+                'top':'0',
+                **smoth_border_style,
+                'background-color':'white',
+                'padding':'20px',
                 'box-sizing': 'border-box'
             },
             children=[
@@ -83,7 +88,7 @@ app.layout = html.Div(
                                 {'label': 'Eating disorders', 'value': 'eating_disorders'}
                             ],
                             multi=False,
-                            placeholder='Select a disorder',  
+                            placeholder='Select a disorder',
                             style={'width': '100%', 'margin': '0 0 5px 0'}
                         ),
                         dcc.Dropdown(id='slct_indicator',
@@ -101,11 +106,11 @@ app.layout = html.Div(
                 html.P('© 2024 Karim, Florian & Finn', id='copyright-text', style={'font-size': '12px'})
             ]
         ),
-        
+
         # Content wrapper
         html.Div(id='content-wrapper',
             style={'width': '80%', 'display': 'flex', 'flex-direction':'column', 'align-items':'center', 'padding':'20px'},
-            children=[  
+            children=[
                 html.Div(id='title-wrapper',
                     style={'background-color': 'white', **smoth_border_style, 'margin': '0 0 20px 0', **std_box_padding},
                     children=[
@@ -114,24 +119,22 @@ app.layout = html.Div(
                             style={'color': '#737373'},
                             children=[
                                 html.P("Mental health conditions affect hundreds of millions of people worldwide, yet their relationship with societal and economic factors remains under-explored. This dashboard visualizes the prevalence of various mental health disorders across different countries and examines their potential correlations with key societal indicators such as GDP, CO₂ emissions, and unemployment rates."),
-                                html.P("Each mental health condition tracked here—from depression and anxiety to schizophrenia and eating disorders—affects individuals differently and may be influenced by various environmental and societal factors. By exploring these relationships, we can better understand how economic and environmental conditions might interact with mental health at a population level."),
+                                html.P("Each mental health condition tracked here — from depression and anxiety to schizophrenia and eating disorders — affects individuals differently and may be influenced by various environmental and societal factors. By exploring these relationships, we can better understand how economic and environmental conditions might interact with mental health at a population level."),
                                 html.P("Use the sidebar controls to select specific mental health conditions and indicators. The visualization tools allow you to explore prevalence rates across different countries, analyze trends over time, and examine potential correlations between mental health and societal factors. ")
                             ]
                         )
                     ]
                 ),
-                
+
                 # Year Slider box
                 html.Div(id='year-slider-box',
                     style={
-                        'width': '100%', 
-                        'margin-bottom': '20px', 
-                        **smoth_border_style, 
-                        **std_box_padding, 
-                        'box-sizing': 'border-box', 
+                        'width': '100%',
+                        'margin-bottom': '20px',
+                        **smoth_border_style,
+                        **std_box_padding,
+                        'box-sizing': 'border-box',
                         'background-color': 'white',
-                        'position': 'sticky',
-                        'top': '20px',
                         'z-index': '900',
                         'backdrop-filter': 'blur(8px)',
                     },
@@ -145,21 +148,32 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-                
+
                 # Box for the map
                 html.Div(id='map-box',
-                    style={'width':'100%', 'margin-bottom': '20px', **smoth_border_style},
+                    style={'width':'100%', 'margin-bottom': '20px', 'display':'flex', 'justify-content':'space-between'},
                     children=[
-                        dcc.Graph(id='disorder_map')
+                        html.Div(id='map-conainter',
+                            style={'width':'72%', **smoth_border_style},
+                            children=[
+                                dcc.Graph(id='disorder_map')
+                            ]
+                        ),
+                        html.Div(id='donut-box',
+                            style={'width':'26%','background-color':'white', **smoth_border_style},
+                            children=[
+                                dcc.Graph(id='disorders_donut',style={'width':'100%'})
+                            ]
+                        )
                     ]
                 ),
-                
+
                 # Wrapper for first row after map
                 html.Div(id='disorder-graph-wrapper',
                     style={'width':'100%', 'display':'flex', 'justify-content':'space-between', 'margin': '0 0 20px 0'},
                     children=[
                         html.Div(id='graph1-container',
-                            style={'width':'69%'},
+                            style={'width':'72%'},
                             children=[
                                 html.Div(id='disorder-graph-text-box',
                                     style={'width':'100%','background-color': 'white', 'margin-bottom':'10px', **smoth_border_style,'padding':'0 20px 0 20px'},
@@ -172,79 +186,151 @@ app.layout = html.Div(
                                     style={**smoth_border_style},
                                     children=[
                                         dcc.Graph(id='disorders_graph',
-                                            style={}  
+                                            style={}
                                         )
                                     ]
                                 )
                             ]
                         ),
-                        html.Div(id='donut-box',
-                            style={'width':'29%','background-color':'white', **smoth_border_style},
+                        # Correlation Analysis Section
+                        html.Div(id='correlation-box',
+                            style={'width': '26%', 'background-color': 'white', **smoth_border_style, 'padding': '20px', 'box-sizing': 'border-box', 'position':'relative'},
                             children=[
-                                dcc.Graph(id='disorders_donut',style={'width':'100%'})
-                            ]
-                        )
-                    ]
-                ),
-                # Correlation Analysis Section
-                html.Div(id='correlation-box',
-                    style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'padding': '20px', 'box-sizing': 'border-box'},
-                    children=[
-                        html.H3('Correlation Analysis', style={'margin-bottom': '15px'}),
-                        html.Div(id='correlation-content',
-                            style={'display': 'flex', 'align-items': 'center', 'justify-content': 'space-between'},
-                            children=[
-                                # Left section - Correlation coefficient
-                                html.Div(style={'width': '30%', 'text-align': 'center'},
+                                html.H3('Correlation Analysis', style={'margin-bottom': '15px'}),
+                                html.Div(id='correlation-content',
+                                    style={'display': 'flex', 'align-items': 'center', 'justify-content': 'space-between', 'flex-direction':'column'},
                                     children=[
-                                        html.H2(id='correlation-value',
-                                            style={'font-size': '48px', 'margin': '0', 'font-weight': 'bold'}
-                                        ),
-                                        html.P(id='correlation-label',
-                                            style={'margin': '5px 0', 'color': '#666'}
-                                        )
-                                    ]
-                                ),
-                                # Center section - Strength bar
-                                html.Div(style={'width': '40%'},
-                                    children=[
-                                        html.Div(style={'margin-bottom': '5px'},
+                                        # Left section - Correlation coefficient
+                                        html.Div(style={'width': '100%', 'text-align': 'center', 'margin-bottom': '30px'},
                                             children=[
-                                                html.Span("Correlation Strength", style={'color': '#666'}),
-                                                html.Span(id='strength-label',
-                                                    style={'float': 'right', 'font-weight': 'bold'}
+                                                html.H2(id='correlation-value',
+                                                    style={'font-size': '48px', 'margin': '0', 'font-weight': 'bold'}
+                                                ),
+                                                html.P(id='correlation-label',
+                                                    style={'margin': '5px 0', 'color': '#666'}
                                                 )
                                             ]
                                         ),
-                                        html.Div(style={
-                                            'width': '100%',
-                                            'height': '10px',
-                                            'background-color': '#f3f4f6',
-                                            'border-radius': '5px',
-                                            'overflow': 'hidden'
-                                        },
+                                        # Center section - Strength bar
+                                        html.Div(style={'width': '100%', 'margin-bottom': '30px'},
                                             children=[
-                                                html.Div(id='strength-bar',
-                                                    style={
-                                                        'height': '100%',
-                                                        'width': '0%',
-                                                        'transition': 'width 0.5s ease-in-out'
-                                                    }
+                                                html.Div(style={'margin-bottom': '5px'},
+                                                    children=[
+                                                        html.Span("Correlation Strength", style={'color': '#666'}),
+                                                        html.Span(id='strength-label',
+                                                            style={'float': 'right', 'font-weight': 'bold'}
+                                                        )
+                                                    ]
+                                                ),
+                                                html.Div(style={
+                                                    'width': '100%',
+                                                    'height': '10px',
+                                                    'background-color': '#f3f4f6',
+                                                    'border-radius': '5px',
+                                                    'overflow': 'hidden'
+                                                },
+                                                    children=[
+                                                        html.Div(id='strength-bar',
+                                                            style={
+                                                                'height': '100%',
+                                                                'width': '0%',
+                                                                'transition': 'width 0.5s ease-in-out'
+                                                            }
+                                                        )
+                                                    ]
                                                 )
                                             ]
-                                        )
+                                        ),
+                                        # Right section - Interpretation
+                                        html.Div(id='correlation-interpretation', style={'width': '100%', 'padding': '10px', 'margin-bottom': '30px'}),
+                                        html.Em("Note: Correlation does not imply causation — these relationships are complex and multifaceted.", style={'color': '#666', 'font-size': '14px', 'position':'absolute', 'bottom':'20px', 'left':'20px'})
                                     ]
-                                ),
-                                # Right section - Interpretation
-                                html.Div(id='correlation-interpretation', style={'width': '25%', 'padding': '10px', 'border-left': '2px solid #f3f4f6'})
+                                )
                             ]
                         ),
-                        html.Em("Note: Correlation does not imply causation—these relationships are complex and multifaceted.", style={'color': '#666', 'font-size': '14px'})
+                    ]
+                ),
+
+                # comparison
+                html.Div(id='country-comparison-box',
+                    style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'margin-top': '20px', 'padding': '20px', 'box-sizing': 'border-box', 'position':'relative'},
+                    children=[
+                        # Title and description section
+                        html.Div(
+                            style={'margin-bottom': '20px'},
+                            children=[
+                                html.H3('Country Comparison', style={'margin-bottom': '8px'}),
+                                html.Div(id='comparison-desc-box',
+                                    style={'display':'flex', 'justify-content':'space-between'},
+                                    children=[
+                                        html.P(
+                                            'Compare mental health indicators and societal factors between two countries to identify patterns and correlations. All data are normalized in order to make visual correlations in the curves optimally recognizable.',
+                                            style={'color': '#666', 'margin': '0', 'width': '96%'}
+                                        ),
+                                        html.Div(id='questionmark-box',
+                                            style={'width': '3%','display':'flex', 'justify-content':'center', 'align-items':'center', 'cursor':'pointer'},
+                                            children=[
+                                                html.Div(id='questionmark-hover-box',
+                                                    style={'position':'absolute', 'top':'120px', 'right':'15px', 'width': '50%', 'background-color':'white', 'z-index':'50', **smoth_border_style, 'padding': '20px'},
+                                                    children=[
+                                                        html.H3('Information about Normalized Data', style={'margin-top':'0'}),
+                                                        html.P('The data displayed in the graph is normalized, meaning that all values have been scaled to enable better visual comparison between the countries. This approach helps to highlight patterns and potential correlations between the curves. However, it is important to note that the normalized data does not represent actual values of the indicators or the mental disorders. Instead, it illustrates relative trends and behaviors, allowing for the identification of similarities in dynamics between the selected countries.', style={'margin-bottom':'0'})    
+                                                    ],
+                                                    className='hidden'
+                                                ),
+                                                html.Div(
+                                                    style={'height':'20px', 'width': '20px'},
+                                                    children=[
+                                                        html.P('?', style={'margin':'0', 'height': '20px', 'width':'20px', 'text-align':'center', 'line-height': '20px', 'color': 'white', 'background-color':'black', 'border-radius': '30px', 'font-size':'.8em'})
+                                                    ]
+                                                )
+                                            ]         
+                                        )
+                                    ]
+                                )
+                            ]
+                        ),
+                        # Country selection row
+                        html.Div(
+                            style={'display': 'flex', 'align-items': 'center', 'gap': '20px', 'margin-bottom': '20px'},
+                            children=[
+                                # First country display
+                                html.Div(
+                                    style={'flex': '1'},
+                                    children=[
+                                        html.Label("Base Country", style={'margin-bottom': '5px', 'display': 'block', 'font-weight': 'bold'}),
+                                        html.Div(id='selected_country_display',
+                                            style={
+                                                'padding': '8px 12px',
+                                                'border': '1px solid #e5e7eb',
+                                                'border-radius': '4px',
+                                                'background-color': '#f9fafb'
+                                            })
+                                    ]
+                                ),
+                                # Second country dropdown
+                                html.Div(
+                                    style={'flex': '1'},
+                                    children=[
+                                        html.Label("Comparison Country", style={'margin-bottom': '5px', 'display': 'block', 'font-weight': 'bold'}),
+                                        dcc.Dropdown(
+                                            id='country_2_dropdown',
+                                            options=ccf.format_dropdown_options(unique_countries),
+                                            placeholder='Search and select a country',
+                                            style={'width': '100%'},
+                                            searchable=True,
+                                            clearable=True
+                                        )
+                                    ]
+                                )
+                            ]
+                        ),
+                        dcc.Graph(id='country_comparison_graph')
                     ]
                 )
             ]
         )
-    ] 
+    ]
 )
 
 # Map Callback
@@ -257,8 +343,9 @@ app.layout = html.Div(
 
 def update_map(disorder, indicator, year):
     if not disorder or not indicator:
-        return cg.get_default_corr_graph(colors)
-    
+        return mf.plot_default_map(mh_data_map)
+        # return cg.get_default_corr_graph(colors)
+
     map_fig = mf.plot_bivariate_map(mh_data_map, disorder, indicator, year,'pink-blue')
 
     return map_fig
@@ -267,6 +354,7 @@ def update_map(disorder, indicator, year):
 # Correlation graph & donut callback
 @app.callback(
      [Output(component_id='disorders_graph', component_property='figure'),
+
       Output(component_id='disorders_donut', component_property='figure')],
     [Input(component_id='slct_disorder', component_property='value'),
      Input(component_id='slct_indicator', component_property='value'),
@@ -275,16 +363,16 @@ def update_map(disorder, indicator, year):
 )
 
 def update_corr_and_donut(disorder, indicator, click_data, year):
-    
+
     if not disorder or not indicator or not click_data:
         return cg.get_default_corr_graph(colors), dg.get_default_donut(colors)
-    
+
     country_code = click_data['points'][0]['location']
     country_name = country_dict[country_code]
     corr_fig = cg.get_corr_graph(mh_data, disorder, indicator, country_code, country_name, colors)
     donut_fig = dg.get_donut_graph(mh_data, country_code, country_name, year, colors)
 
-    return corr_fig, donut_fig    
+    return corr_fig, donut_fig
 
 
 
@@ -307,10 +395,33 @@ def update_correlation(click_data, disorder, indicator):
     country_code = click_data['points'][0]['location']
     country_name = country_dict[country_code]
     corr_explain = ce.get_corr_expl(mh_data, country_code, country_name, disorder, indicator, colors)
-    
+
     return corr_explain[0], corr_explain[1], corr_explain[2], corr_explain[3], corr_explain[4], corr_explain[5]
 
 
+@app.callback(
+    [Output('country_comparison_graph', 'figure'),
+     Output('selected_country_display', 'children')],
+    [Input('disorder_map', 'clickData'),
+     Input('country_2_dropdown', 'value'),
+     Input('slct_disorder', 'value'),
+     Input('slct_indicator', 'value')]
+)
+def update_comparison_graph(click_data, country2, disorder, indicator):
+    if not click_data:
+        return ccf.get_default_comparison_graph(colors), "No country selected"
+
+    country1 = click_data['points'][0]['location']
+
+    if not all([country2, disorder, indicator]):
+        return ccf.get_default_comparison_graph(colors), f"Selected country: {country_dict[country1]}"
+
+    return (
+        ccf.create_country_comparison(
+            mh_data, country1, country2, disorder, indicator, country_dict, colors
+        ),
+        f"Selected country: {country_dict[country1]}"
+    )
 
 if __name__ == '__main__':
     app.run_server(debug=True)
