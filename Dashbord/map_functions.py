@@ -177,7 +177,7 @@ def add_bivariate_legend(fig, x_legend, y_legend, colors, conf=None):
     if conf is None:
         conf = {
             'top': 0.3,  # Vertical position of the top right corner (0: bottom, 1: top)
-            'right': 0.2,  # Horizontal position of the top right corner (0: left, 1: right)
+            'right': 0.25,  # Horizontal position of the top right corner (0: left, 1: right)
             'box_w': 0.04,  # Width of each rectangle
             'box_h': 0.08,  # Height of each rectangle
             'line_color': 'rgba(0,0,0,0)',  # Transparent borders

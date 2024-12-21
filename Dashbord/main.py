@@ -1,4 +1,4 @@
-from dash import Dash, dcc, html, Input, Output
+from dash import Dash, dcc, html, Input, Output, no_update
 import pandas as pd
 
 import corr_graph_functions as cg
@@ -6,6 +6,9 @@ import map_functions as mf
 import donut_graph_functions as dg
 import corr_explain_functions as ce
 import country_comparison_functions as ccf
+from dash import callback_context as ctx   # Add this import at the top of your file
+
+
 
 
 app = Dash(__name__)
@@ -339,28 +342,51 @@ app.layout = html.Div(
     [Input(component_id='slct_disorder', component_property='value'),
      Input(component_id='slct_indicator', component_property='value'),
      Input(component_id='year_slider', component_property='value'),
-     Input(component_id='disorder_map', component_property='clickData')
+     Input(component_id='disorder_map', component_property='clickData'),
+    Input(component_id='disorder_map', component_property='relayoutData')
      ]
 )
 
-def update_map(disorder, indicator, year, click_data):
+
+def update_map(disorder, indicator, year, click_data, relayout_data):
+
+    #Zooming issue
+
+    trigger = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    # When zooming occurs, check and enforce zoom limits
+    if trigger == 'disorder_map' and 'relayoutData' in ctx.triggered[0]['prop_id']:
+        if relayout_data and 'geo.projection.scale' in relayout_data:
+            current_zoom = relayout_data['geo.projection.scale']
+            #print(f"Current map zoom level: {current_zoom}")
+
+            # Define our zoom limits
+            MIN_ZOOM = 1
+            MAX_ZOOM = 10
+
+            # If zoom is within bounds, maintain current view
+            if MIN_ZOOM <= current_zoom <= MAX_ZOOM:
+                return no_update
+
+
+
     if not disorder or not indicator:
         return mf.plot_default_map(mh_data_map)
 
     clicked_country = None
     if click_data and 'points' in click_data and len(click_data['points']) > 0:
         clicked_country = click_data['points'][0].get('location')
-        print(clicked_country)
+        # #print(clicked_country)
 
 
-        country_data = mh_data_map[(mh_data_map['Code'] == clicked_country) & (mh_data_map['Year'] == year)]
+        # country_data = mh_data_map[(mh_data_map['Code'] == clicked_country) & (mh_data_map['Year'] == year)]
 
-        if not country_data.empty:
-            print("\nCountry Data for Year", year)
-            print("------------------------")
-            print(country_data.iloc[0].to_string())
-        else:
-            print(f"No data found for country {clicked_country} in year {year}")
+        # if not country_data.empty:
+        #     print("\nCountry Data for Year", year)
+        #     print("------------------------")
+        #     print(country_data.iloc[0].to_string())
+        # else:
+        #     print(f"No data found for country {clicked_country} in year {year}")
 
 
     map_fig = mf.plot_bivariate_map(
@@ -374,7 +400,7 @@ def update_map(disorder, indicator, year, click_data):
     return map_fig
 
 
-# Correlation graph & donut callback
+#Correlation graph & donut callback
 @app.callback(
      [Output(component_id='disorders_graph', component_property='figure'),
 
