@@ -14,6 +14,10 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, country_name ,col
             indicator_title = 'CO2 emissions'
         case 'unemployment_rate':
             indicator_title = 'Unemployment rate'
+        case 'life_expectancy':
+            indicator_title = 'Life expectancy (in years)'
+        case 'health_expenditure':
+            indicator_title = 'Health expenditure (in $, PPP)'
         case _:
             print(f"An unknown indicator {indicator} is given")
             return get_default_corr_graph(colors)

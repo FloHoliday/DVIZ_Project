@@ -6,7 +6,7 @@ import map_functions as mf
 import donut_graph_functions as dg
 import corr_explain_functions as ce
 import country_comparison_functions as ccf
-
+import dis_ind_functions as dif
 
 app = Dash(__name__)
 
@@ -76,7 +76,7 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     id='dropdown-wrapper',
-                    style={'width':'100%', 'margin-bottom': '150px'},
+                    style={'width':'100%', 'margin-bottom': '0px'},
                     children=[
                         html.H3("Select disorder & indicator", style={'margin': '0 0 20px 0'}),
                         dcc.Dropdown(id='slct_disorder',
@@ -95,7 +95,9 @@ app.layout = html.Div(
                             options=[
                                 {'label': 'GDP', 'value': 'gdp'},
                                 {'label': 'CO2 emissions', 'value': 'co2_emissions'},
-                                {'label': 'Unemployment rate', 'value': 'unemployment_rate'}
+                                {'label': 'Unemployment rate', 'value': 'unemployment_rate'},
+                                {'label': 'Life expectancy', 'value': 'life_expectancy'},
+                                {'label': 'Health expenditure', 'value': 'health_expenditure'}
                             ],
                             multi=False,
                             placeholder='Select an indicator',
@@ -103,7 +105,24 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-                html.P('© 2024 Karim, Florian & Finn', id='copyright-text', style={'font-size': '12px'})
+
+                # Display the currently selected country
+                html.Div(
+                    id='flag-container',
+                    style={
+                        'width': '100%', 
+                        'height': '100px',  # Fixed height
+                        'display': 'flex',
+                        'justify-content': 'center',
+                        'align-items': 'center',  # Center vertically
+                        'overflow': 'hidden'  # Hide overflow
+                    },
+                    children=[
+                        html.Div(id='flag-component')
+                    ]
+                ),
+
+                html.P('© 2025 Finn, Florian & Karim', id='copyright-text', style={'font-size': '12px'})
             ]
         ),
 
@@ -118,7 +137,7 @@ app.layout = html.Div(
                         html.Div(
                             style={'color': '#737373'},
                             children=[
-                                html.P("Mental health conditions affect hundreds of millions of people worldwide, yet their relationship with societal and economic factors remains under-explored. This dashboard visualizes the prevalence of various mental health disorders across different countries and examines their potential correlations with key societal indicators such as GDP, CO₂ emissions, and unemployment rates."),
+                                html.P("Mental health conditions affect hundreds of millions of people worldwide, yet their relationship with societal and economic factors remains under-explored. This dashboard visualizes the prevalence of various mental health disorders across different countries and examines their potential correlations with key societal indicators such as GDP, CO₂ emissions, and more."),
                                 html.P("Each mental health condition tracked here — from depression and anxiety to schizophrenia and eating disorders — affects individuals differently and may be influenced by various environmental and societal factors. By exploring these relationships, we can better understand how economic and environmental conditions might interact with mental health at a population level."),
                                 html.P("Use the sidebar controls to select specific mental health conditions and indicators. The visualization tools allow you to explore prevalence rates across different countries, analyze trends over time, and examine potential correlations between mental health and societal factors. ")
                             ]
@@ -178,8 +197,8 @@ app.layout = html.Div(
                                 html.Div(id='disorder-graph-text-box',
                                     style={'width':'100%','background-color': 'white', 'margin-bottom':'10px', **smoth_border_style,'padding':'0 20px 0 20px'},
                                     children=[
-                                        html.H3('Graph title comes here', style={'margin-bottom':'0'}),
-                                        html.P('And here a short description of the Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua')
+                                        html.H3('Please select a country, disorder and indicator', id='graph-title', style={'margin-bottom':'0'}),
+                                        html.P(id='graph-description')
                                     ]
                                 ),
                                 html.Div(id='disorder-graph-box',
@@ -350,6 +369,30 @@ def update_map(disorder, indicator, year):
 
     return map_fig
 
+@app.callback(
+    Output('flag-component', 'children'),
+    [Input('disorder_map', 'clickData')]
+)
+def update_flag(click_data):
+    if not click_data:
+        return None
+    country_code = click_data['points'][0]['location']
+    two_letter_code = ccf.three_to_two_letter_code(country_code)
+    if two_letter_code:
+        return html.Img(
+            src=f"https://flagcdn.com/w160/{two_letter_code}.png",
+            style={
+                'max-width': '160px', 
+                'max-height': '90px',
+                'width': 'auto',
+                'height': 'auto',
+                'border-radius': '4px',
+                'border': '1px solid #e5e7eb',
+                'box-shadow': '0 1px 3px rgba(0,0,0,0.24)'
+            }
+        )
+    else:
+        return None
 
 # Correlation graph & donut callback
 @app.callback(
@@ -422,6 +465,45 @@ def update_comparison_graph(click_data, country2, disorder, indicator):
         ),
         f"Selected country: {country_dict[country1]}"
     )
+
+
+@app.callback(
+    [
+        Output('graph-title', 'children'),
+        Output('graph-description', 'children')
+    ],
+    [
+        Input('disorder_map', 'clickData'),
+        Input('slct_disorder', 'value'),
+        Input('slct_indicator', 'value')
+    ]
+)
+def update_graph_description(clickData, disorder, indicator):
+    # Check if any input is missing
+    if not all([clickData, disorder, indicator]):
+        return (
+            "Please select all parameters",
+            "Select a country, disorder and indicator to view the analysis"
+        )
+    
+    # Get country name from clickData
+    country_code = clickData['points'][0]['location']
+    country_name = country_dict[country_code]
+    
+    # Format disorder name for display
+    friendly_disorder = dif.get_friendly_disorder(disorder)
+    friendly_indicator = dif.get_friendly_disorder(indicator)
+
+    # Create title and description
+    title = f"{friendly_disorder} and {friendly_indicator} Analysis for {country_name}"
+    description = (
+        f"This graph shows the relationship between {friendly_disorder} prevalence "
+        f"and {friendly_indicator} in {country_name} over time. The lines represent "
+        f"the trends for both metrics, allowing you to observe any potential correlations "
+        f"or patterns between them."
+    )
+    
+    return title, description
 
 if __name__ == '__main__':
     app.run_server(debug=True)
