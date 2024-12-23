@@ -24,15 +24,31 @@ smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(0, 0, 0, 0.13) 
 std_box_padding = {'padding': '20px'}
 
 colors = {
-    'green': '#38adad',
-    'blue': '#3b4994',
-    'lightblue': '#ace4e4',
-    'midlbue': '#5ac8c8',
-    'dense_pink': '#dfb0d6',
+    'light-yellow' : '#f4f799',  # Light Gray (Bottom-left: Low disorder, Low indicator) old #f0f0f0
+    'aqua': '#89d3d3',  # Aqua (Bottom-center: Low disorder, Medium indicator)
+    'deep-teal': '#2ca3a3',  # Deep Teal (Bottom-right: Low disorder, High indicator)
+    'blush-pink' : '#e8a3cc',  # Blush Pink (Middle-left: Medium disorder, Low indicator)
+    'lavender' : '#a983d5',  # Lavender (Middle-center: Medium disorder, Medium indicator)
+    'rich-blue' : '#416eb7',  # Rich Blue (Middle-right: Medium disorder, High indicator)
+    'magenta' : '#d96ba8',  # Magenta (Top-left: High disorder, Low indicator)
+    'amethyst' : '#9a52c2',  # Amethyst (Top-center: High disorder, Medium indicator)
+    'deep-navy' : '#2f3b99',   # Deep Navy (Top-right: High disorder, High indicator)
     'positive': '#34d399',  # Green for positive correlation
     'negative': '#f87171',  # Red for negative correlation
-    'neutral': '#9ca3af'    # Gray for weak correlation
+    'neutral': '#9ca3af',    # Gray for weak correlation
 }
+
+map_colors = [
+    colors['light-yellow'], 
+    colors['aqua'], 
+    colors['deep-teal'], 
+    colors['blush-pink'], 
+    colors['lavender'], 
+    colors['rich-blue'], 
+    colors['magenta'], 
+    colors['amethyst'], 
+    colors['deep-navy'], 
+]
 
 country_code_df = mh_data[['Entity', 'Code']].drop_duplicates()
 country_dict = dict(zip(country_code_df['Code'], country_code_df['Entity']))
@@ -375,7 +391,6 @@ def update_map(disorder, indicator, year, click_data, relayout_data):
     if trigger == 'disorder_map' and 'relayoutData' in ctx.triggered[0]['prop_id']:
         if relayout_data and 'geo.projection.scale' in relayout_data:
             current_zoom = relayout_data['geo.projection.scale']
-            #print(f"Current map zoom level: {current_zoom}")
 
             # Define our zoom limits
             MIN_ZOOM = 1
@@ -393,24 +408,12 @@ def update_map(disorder, indicator, year, click_data, relayout_data):
     clicked_country = None
     if click_data and 'points' in click_data and len(click_data['points']) > 0:
         clicked_country = click_data['points'][0].get('location')
-        # #print(clicked_country)
-
-
-        # country_data = mh_data_map[(mh_data_map['Code'] == clicked_country) & (mh_data_map['Year'] == year)]
-
-        # if not country_data.empty:
-        #     print("\nCountry Data for Year", year)
-        #     print("------------------------")
-        #     print(country_data.iloc[0].to_string())
-        # else:
-        #     print(f"No data found for country {clicked_country} in year {year}")
-
 
     map_fig = mf.plot_bivariate_map(
         mh_data_map, disorder,
         indicator,
         year,
-        color_set_name='pink-blue-2',
+        map_colors,
         highlight_country=clicked_country
         )
 

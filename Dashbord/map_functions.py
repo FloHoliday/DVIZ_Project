@@ -79,35 +79,6 @@ def classify_percentage(percentage):
         return 'C'
 
 
-def get_map_color_sets():
-    color_sets = {'pink-blue': [
-    '#e8e8e8',  # Light Gray (Bottom-left: Low disorder, Low indicator )
-    '#ace4e4',  # Pale Aqua (Bottom-center: Low , Medium )
-    '#5ac8c8',  # Bright Teal (Bottom-right: Low , High)
-    '#dfb0d6',  # Soft Pink (Middle-left: Medium , Low)
-    '#a5add3',  # Periwinkle (Middle-center: Medium , Medium )
-    '#5698b9',  # Sky Blue (Middle-right: Medium , High)
-    '#be64ac',  # Orchid (Top-left: High , Low )
-    '#8c62aa',  # Violet (Top-center: High , Medium)
-    '#3b4994'   # Navy Blue (Top-right: High , High)
-],
-                  'pink-blue-2': [
-    '#f4f799',  # Light Gray (Bottom-left: Low disorder, Low indicator) old #f0f0f0
-    '#89d3d3',  # Aqua (Bottom-center: Low disorder, Medium indicator)
-    '#2ca3a3',  # Deep Teal (Bottom-right: Low disorder, High indicator)
-    '#e8a3cc',  # Blush Pink (Middle-left: Medium disorder, Low indicator)
-    '#a983d5',  # Lavender (Middle-center: Medium disorder, Medium indicator)
-    '#416eb7',  # Rich Blue (Middle-right: Medium disorder, High indicator)
-    '#d96ba8',  # Magenta (Top-left: High disorder, Low indicator)
-    '#9a52c2',  # Amethyst (Top-center: High disorder, Medium indicator)
-    '#2f3b99'   # Deep Navy (Top-right: High disorder, High indicator)
-],
-        'teal-red':    ['#e8e8e8', '#e4acac', '#c85a5a', '#b0d5df', '#ad9ea5', '#985356', '#64acbe', '#627f8c', '#574249'],
-        'blue-organe': ['#fef1e4', '#fab186', '#f3742d',  '#97d0e7', '#b0988c', '#ab5f37', '#18aee5', '#407b8f', '#5c473d']
-    }
-    return color_sets
-
-
 def create_bivariate_color_mapping(colors):
     return {
         ('A', 'A'): colors[0],
@@ -251,7 +222,7 @@ def add_bivariate_legend(fig, x_legend, y_legend, colors, conf=None):
     return fig
 
 
-def plot_bivariate_map(df, disorder, factor, year, color_set_name, highlight_country=None):
+def plot_bivariate_map(df, disorder, factor, year, map_colors, highlight_country=None):
     """
     Plot a bivariate choropleth map based on classifications.
 
@@ -267,12 +238,8 @@ def plot_bivariate_map(df, disorder, factor, year, color_set_name, highlight_cou
     """
     df_year = df[df['Year'] == year].copy()
 
-    # Select the color set
-    color_sets = get_map_color_sets()
-    colors = color_sets[color_set_name]
-
     # Create a color mapping
-    color_mapping = create_bivariate_color_mapping(colors)
+    color_mapping = create_bivariate_color_mapping(map_colors)
 
     # Assign colors to countries
     df = assign_bivariate_colors(df_year, disorder, factor, color_mapping)
@@ -326,7 +293,7 @@ def plot_bivariate_map(df, disorder, factor, year, color_set_name, highlight_cou
     fig.update_layout(showlegend=False)
 
     # Add the bivariate legend
-    add_bivariate_legend(fig, factor.replace('_', ' ').title(), disorder.replace('_', ' ').title(), colors)
+    add_bivariate_legend(fig, factor.replace('_', ' ').title(), disorder.replace('_', ' ').title(), map_colors)
 
     return fig
 

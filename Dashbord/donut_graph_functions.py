@@ -6,6 +6,13 @@ def get_donut_graph(mh_data, country_code, country_name, year, colors):
     labels = [col.replace('_', ' ').title() for col in mental_health_columns]
     mh_data_filtered = mh_data[(mh_data['Code'] == country_code) & (mh_data['Year'] == year)]
     values = mh_data_filtered[mental_health_columns].values.flatten()
+    donut_colors = [
+        colors['aqua'],
+        colors['rich-blue'],
+        colors['lavender'],
+        colors['magenta'],
+        colors['deep-teal']
+        ]
     
     
     # Create the donut chart
@@ -16,7 +23,7 @@ def get_donut_graph(mh_data, country_code, country_name, year, colors):
         # textinfo='label+percent',
         # textposition='inside',
         # texttemplate='%{label}<br>%{percent:.1%}',
-        marker=dict(colors=[color for key, color in colors.items()])
+        marker=dict(colors=donut_colors)
     )])
 
     # Update layout
@@ -50,7 +57,7 @@ def get_default_donut(colors):
         # labels=labels,
         values=values,
         hole=0.4,
-        marker=dict(colors=[colors['green']]),
+        marker=dict(colors=[colors['aqua']]),
         hoverinfo ='none',
         textinfo='none'
         
