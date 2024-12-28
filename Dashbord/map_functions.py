@@ -264,6 +264,8 @@ def plot_bivariate_map(df, disorder, factor, year, map_colors, highlight_country
         showland=True,
         landcolor="lightgray",
         fitbounds="locations",
+        projection=dict(type='equirectangular'),
+        visible=False,
         showframe=False
     )
 
@@ -323,7 +325,9 @@ def plot_default_map(df):
         showcoastlines=True,
         coastlinecolor="Black",
         showland=True,
-        landcolor="white",  
+        landcolor="white",  # Set the land to white for a clean background
+        projection=dict(type='equirectangular'),
+        visible=False,
         showframe=False
     )
 
