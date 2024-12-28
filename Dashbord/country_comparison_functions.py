@@ -68,8 +68,8 @@ def create_country_comparison(df, country_code1, country_code2, disorder, indica
     
     # Add traces for both countries
     for country_data, country_code, line_color, dash_color in [
-        (country1_data, country_code1, colors['blue'], colors['dense_pink']),
-        (country2_data, country_code2, colors['midlbue'], colors['green'])
+        (country1_data, country_code1, colors['aqua'], colors['aqua']),
+        (country2_data, country_code2, colors['blush-pink'], colors['blush-pink'])
     ]:
         indicator_name = get_friendly_indicator(indicator)
         disorder_name = get_friendly_disorder(disorder)
@@ -98,7 +98,7 @@ def create_country_comparison(df, country_code1, country_code2, disorder, indica
     
     # Update layout
     fig.update_layout(
-        title=f"Comparison: {disorder_name} vs {indicator_name}",
+        # title=f"Comparison: {disorder_name} vs {indicator_name}",
         paper_bgcolor='white',
         plot_bgcolor='white',
         height=400,
