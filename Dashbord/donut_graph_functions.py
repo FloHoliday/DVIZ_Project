@@ -8,6 +8,8 @@ def get_donut_graph(mh_data, country_code, country_name, year, colors):
     labels = [col.replace('_', ' ').title() for col in mental_health_columns]
     mh_data_filtered = mh_data[(mh_data['Code'] == country_code) & (mh_data['Year'] == year)]
     values = mh_data_filtered[mental_health_columns].values.flatten()
+    lable_value_dict = dict(zip(labels, values))
+    highest_disorder = max(lable_value_dict, key=lable_value_dict.get)
     
     donut_colors = [
         colors['aqua'],
@@ -45,7 +47,10 @@ def get_donut_graph(mh_data, country_code, country_name, year, colors):
         ),
         margin=dict(t=90, b=120, l=30, r=30)
     )
-    return fig
+    
+    donut_note = f'In {year}, {highest_disorder} was the most prevalent mental disorder in {country_name} out of the five.'
+    
+    return fig, donut_note
 
 
 def get_default_donut(colors):
