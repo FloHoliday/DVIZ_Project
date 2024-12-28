@@ -210,7 +210,8 @@ app.layout = html.Div(
                         html.Div(id='donut-box',
                             style={'width':'26%','background-color':'white', **smoth_border_style},
                             children=[
-                                dcc.Graph(id='disorders_donut',style={'width':'100%'})
+                                dcc.Graph(id='disorders_donut',style={'width':'100%'}),
+                                html.P('', id='donut_note', style={'color': '#666', 'font-size': '14px', 'padding': '0 20px 0 20px'})
                             ]
                         )
                     ]
@@ -467,8 +468,8 @@ def update_flag(click_data):
 # Correlation graph & donut callback
 @app.callback(
      [Output(component_id='disorders_graph', component_property='figure'),
-
-      Output(component_id='disorders_donut', component_property='figure')],
+      Output(component_id='disorders_donut', component_property='figure'),
+      Output(component_id='donut_note', component_property='children')],
     [Input(component_id='slct_disorder', component_property='value'),
      Input(component_id='slct_indicator', component_property='value'),
      Input(component_id='disorder_map', component_property='clickData'),
@@ -478,14 +479,14 @@ def update_flag(click_data):
 def update_corr_and_donut(disorder, indicator, click_data, year):
 
     if not disorder or not indicator or not click_data:
-        return cg.get_default_corr_graph(colors), dg.get_default_donut(colors)
+        return cg.get_default_corr_graph(colors), dg.get_default_donut(colors), ''
 
     country_code = click_data['points'][0]['location']
     country_name = country_dict[country_code]
     corr_fig = cg.get_corr_graph(mh_data, disorder, indicator, country_code, country_name, colors)
-    donut_fig = dg.get_donut_graph(mh_data, country_code, country_name, year, colors)
-
-    return corr_fig, donut_fig
+    donut_fig, donut_note = dg.get_donut_graph(mh_data, country_code, country_name, year, colors)
+    
+    return corr_fig, donut_fig, donut_note
 
 
 
