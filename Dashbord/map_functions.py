@@ -249,8 +249,9 @@ def plot_bivariate_map(df, disorder, factor, year, map_colors, highlight_country
         df,
         locations="Code",
         color="color",
+        hover_name="Entity",
         hover_data={
-            'Entity': True,
+            'Entity': False,
             "Code": False
 
         },
