@@ -147,8 +147,8 @@ def add_bivariate_legend(fig, x_legend, y_legend, colors, conf=None):
     # Use default configuration if none is provided
     if conf is None:
         conf = {
-            'top': 0.3,  # Vertical position of the top right corner (0: bottom, 1: top)
-            'right': 0.25,  # Horizontal position of the top right corner (0: left, 1: right)
+            'top': 0.4,  # Vertical position of the top right corner (0: bottom, 1: top)
+            'right': 0.2,  # Horizontal position of the top right corner (0: left, 1: right)
             'box_w': 0.04,  # Width of each rectangle
             'box_h': 0.08,  # Height of each rectangle
             'line_color': 'rgba(0,0,0,0)',  # Transparent borders
@@ -195,7 +195,7 @@ def add_bivariate_legend(fig, x_legend, y_legend, colors, conf=None):
         x=coord[8]['x1'], y=coord[8]['y1'],  #position
         xref='paper', yref='paper',
         showarrow=False,
-        text=f"{conf['legend_x_label']} 🠒",
+        text=f"{conf['legend_x_label']}",
         font=dict(
             size=conf['legend_font_size'],
             color=conf['legend_font_color']
@@ -251,12 +251,9 @@ def plot_bivariate_map(df, disorder, factor, year, map_colors, highlight_country
         color="color",
         hover_data={
             'Entity': True,
-            #disorder: ':.2f',
-            #factor: ':.2f',
             "Code": False
 
         },
-        title=f"Bivariate Map of {disorder.replace('_', ' ').title()} and {factor.replace('_', ' ').title()}",
         color_discrete_map="identity"
     )
 
@@ -266,7 +263,8 @@ def plot_bivariate_map(df, disorder, factor, year, map_colors, highlight_country
         coastlinecolor="Black",
         showland=True,
         landcolor="lightgray",
-        fitbounds="locations"
+        fitbounds="locations",
+        showframe=False
     )
 
     if highlight_country:
@@ -318,7 +316,6 @@ def plot_default_map(df):
         color="default_color",  # Use the default color
         color_discrete_map={'lightgray': 'lightgray'},  # Map lightgray as the color
         hover_data={"Code": True, 'default_color': False},
-        title="Default Map (Select a Country to Highlight)"
     )
 
     #Update the map layout
@@ -326,7 +323,8 @@ def plot_default_map(df):
         showcoastlines=True,
         coastlinecolor="Black",
         showland=True,
-        landcolor="white",  # Set the land to white for a clean background
+        landcolor="white",  
+        showframe=False
     )
 
 

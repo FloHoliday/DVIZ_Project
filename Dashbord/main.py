@@ -189,10 +189,22 @@ app.layout = html.Div(
                 html.Div(id='map-box',
                     style={'width':'100%', 'margin-bottom': '20px', 'display':'flex', 'justify-content':'space-between'},
                     children=[
-                        html.Div(id='map-conainter',
-                            style={'width':'72%', **smoth_border_style},
+                        html.Div(
+                            style={'width' : '72%'},
                             children=[
-                                dcc.Graph(id='disorder_map')
+                                html.Div(
+                                    style={**smoth_border_style, 'margin-bottom' : '20px', 'background-color' : 'white', 'padding': '0 20px 0 20px'},
+                                    children=[
+                                        html.H3("", style={'margin-bottom' : '0'}, id='map-title'),
+                                        html.P("text here", id='map-description')
+                                    ]
+                                ),
+                                html.Div(id='map-conainter',
+                                    style={**smoth_border_style},
+                                    children=[
+                                        dcc.Graph(id='disorder_map')
+                                    ]
+                                )
                             ]
                         ),
                         html.Div(id='donut-box',
@@ -371,7 +383,9 @@ app.layout = html.Div(
 
 # Map Callback
 @app.callback(
-      Output(component_id='disorder_map', component_property='figure'),
+    [Output(component_id='disorder_map', component_property='figure'),
+     Output(component_id='map-title', component_property='children'),
+     Output(component_id='map-description', component_property='children')],
     [Input(component_id='slct_disorder', component_property='value'),
      Input(component_id='slct_indicator', component_property='value'),
      Input(component_id='year_slider', component_property='value'),
@@ -403,7 +417,7 @@ def update_map(disorder, indicator, year, click_data, relayout_data):
 
 
     if not disorder or not indicator:
-        return mf.plot_default_map(mh_data_map)
+        return mf.plot_default_map(mh_data_map), 'Please select all parameters', "Select a country and a disorder to view the bivariate map"
 
     clicked_country = None
     if click_data and 'points' in click_data and len(click_data['points']) > 0:
@@ -416,8 +430,14 @@ def update_map(disorder, indicator, year, click_data, relayout_data):
         map_colors,
         highlight_country=clicked_country
         )
+    
+    disorder_title = disorder.replace('_', ' ').title()
+    indicator_title = indicator.replace('_', ' ').title()
+    map_title = f'Bivariate map of {disorder_title} and {indicator_title} in {year}'
+    explaination_text = f'This bivariate map visualizes the relationship between {disorder_title} prevalence and {indicator_title} across countries. Combined color gradients highlight patterns or correlations, revealing how these variables interact globally.'
 
-    return map_fig
+    return map_fig, map_title, explaination_text
+
 
 @app.callback(
     Output('flag-component', 'children'),
@@ -518,15 +538,11 @@ def update_comparison_graph(click_data, country2, disorder, indicator):
 
 
 @app.callback(
-    [
-        Output('graph-title', 'children'),
-        Output('graph-description', 'children')
-    ],
-    [
-        Input('disorder_map', 'clickData'),
-        Input('slct_disorder', 'value'),
-        Input('slct_indicator', 'value')
-    ]
+    [Output('graph-title', 'children'),
+    Output('graph-description', 'children')],
+    [Input('disorder_map', 'clickData'),
+    Input('slct_disorder', 'value'),
+    Input('slct_indicator', 'value')]
 )
 def update_graph_description(clickData, disorder, indicator):
     # Check if any input is missing
