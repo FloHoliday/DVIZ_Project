@@ -29,7 +29,7 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, country_name ,col
         y=mh_data_disorder[disorder],
         mode='lines',
         name=f'{mh_display_name}',
-        line=dict(color=colors['green'], width=2),
+        line=dict(color=colors['aqua'], width=2),
         line_shape='spline',
         yaxis='y1'
     ))
@@ -39,24 +39,12 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, country_name ,col
         y=mh_data_indicator[indicator],
         mode='lines',
         name=indicator_title,
-        line=dict(color=colors['blue'], width=2),
+        line=dict(color=colors['blush-pink'], width=2),
         line_shape='spline',
         yaxis='y2'
     ))
     # Update layout for secondary y-axis
     fig.update_layout(
-        # Title
-        title={
-            'text': f'{mh_display_name} and {indicator_title} in {country_name} over the Years',
-            'x': 0.5,  # Center the title
-            'xanchor': 'center',
-            'yanchor': 'top',
-            'font': {
-                'size': 18,
-                'color': '#333',  # Dark gray for a modern look
-                'family': 'Roboto, Arial, sans-serif'  # Clean sans-serif font
-            }
-        },
         
         # Background
         plot_bgcolor='#f9f9f9',  
@@ -85,16 +73,16 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, country_name ,col
             gridcolor='#eaeaea', 
             zeroline=False,  
             showline=True,
-            linecolor=colors['green'],
+            linecolor=colors['aqua'],
             ticks='outside',
-            tickcolor=colors['green'],
+            tickcolor=colors['aqua'],
             tickfont=dict(
                 size=12,
-                color=colors['green']
+                color=colors['aqua']
             ),
             titlefont=dict(
                 size=14,
-                color=colors['green']
+                color=colors['aqua']
             )
         ),
         yaxis2=dict(
@@ -103,15 +91,15 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, country_name ,col
             side='right',
             showgrid=False,
             showline=True,
-            linecolor=colors['blue'],
-            tickcolor=colors['blue'],
+            linecolor=colors['blush-pink'],
+            tickcolor=colors['blush-pink'],
             tickfont=dict(
                 size=12,
-                color=colors['blue']
+                color=colors['blush-pink']
             ),
             titlefont=dict(
                 size=14,
-                color=colors['blue']
+                color=colors['blush-pink']
             )
         ),
         
@@ -144,20 +132,7 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, country_name ,col
 def get_default_corr_graph(colors):
     """Create a default figure with styling but no data."""
     fig = go.Figure()
-    fig.update_layout(
-        # Title
-        title={
-            'text': 'Select a Disorder and Indicator',
-            'x': 0.5,
-            'xanchor': 'center',
-            'yanchor': 'top',
-            'font': {
-                'size': 18,
-                'color': '#333',
-                'family': 'Roboto, Arial, sans-serif'
-            }
-        },
-        
+    fig.update_layout(        
         # Background
         plot_bgcolor='#f9f9f9',
         paper_bgcolor='#ffffff',
@@ -177,11 +152,11 @@ def get_default_corr_graph(colors):
             title='Mental Health Metric',
             showgrid=False,
             showline=True,
-            linecolor=colors['green'],
+            linecolor=colors['aqua'],
             ticks='outside',
-            tickcolor=colors['green'],
-            tickfont=dict(size=12, color=colors['green']),
-            titlefont=dict(size=14, color=colors['green'])
+            tickcolor=colors['aqua'],
+            tickfont=dict(size=12, color=colors['aqua']),
+            titlefont=dict(size=14, color=colors['aqua'])
         ),
         yaxis2=dict(
             title='Indicator Metric',
@@ -189,10 +164,10 @@ def get_default_corr_graph(colors):
             side='right',
             showgrid=False,
             showline=True,
-            linecolor=colors['blue'],
-            tickcolor=colors['blue'],
-            tickfont=dict(size=12, color=colors['blue']),
-            titlefont=dict(size=14, color=colors['blue'])
+            linecolor=colors['blush-pink'],
+            tickcolor=colors['blush-pink'],
+            tickfont=dict(size=12, color=colors['blush-pink']),
+            titlefont=dict(size=14, color=colors['blush-pink'])
         ),
         
         # Legend

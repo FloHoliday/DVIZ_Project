@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import stats
-from dis_ind_functions import get_friendly_disorder, get_friendly_indicator
+import friendly_names as fn
 
 def get_default_corr_expl(colors):
     return "—", {'font-size': '48px', 'margin': '0', 'font-weight': 'bold', 'color': colors['neutral']}, \
@@ -50,8 +50,8 @@ def get_corr_expl(mh_data, country_code, country_name, disorder, indicator, colo
         direction = "negligible"
 
     # Create interpretation text
-    disorder_name = get_friendly_disorder(disorder) # make it userfriedly
-    indicator_name = get_friendly_indicator(indicator) # make it userfriedly
+    disorder_name = fn.get_friendly_disorder(disorder) # make it userfriedly
+    indicator_name = fn.get_friendly_indicator_text(indicator) # make it userfriedly
     
     interpretation = f"There is a {strength.lower()} {direction} correlation between {disorder_name} and {indicator_name} in {country_name}"
 

@@ -1,32 +1,40 @@
 import plotly.graph_objects as go
+
 def get_donut_graph(mh_data, country_code, country_name, year, colors):
     mental_health_columns = ['schizophrenia', 'depressive_disorder',
                         'anxiety_disorders', 'bipolar_disorders',
                         'eating_disorders']
-    labels = [col.replace('_', ' ').title() for col in mental_health_columns]
+    
+    labels = [col.replace('_', ' ').capitalize() for col in mental_health_columns]
     mh_data_filtered = mh_data[(mh_data['Code'] == country_code) & (mh_data['Year'] == year)]
     values = mh_data_filtered[mental_health_columns].values.flatten()
+    lable_value_dict = dict(zip(labels, values))
+    highest_disorder = max(lable_value_dict, key=lable_value_dict.get)
     
+    donut_colors = [
+        colors['aqua'],
+        colors['rich-blue'],
+        colors['lavender'],
+        colors['magenta'],
+        colors['deep-teal']
+        ]
     
     # Create the donut chart
     fig = go.Figure(data=[go.Pie(
         labels=labels,
         values=values,
         hole=0.4,
-        # textinfo='label+percent',
-        # textposition='inside',
-        # texttemplate='%{label}<br>%{percent:.1%}',
-        marker=dict(colors=[color for key, color in colors.items()])
+        marker=dict(colors=donut_colors),
+        hoverinfo='label'
+        
     )])
 
     # Update layout
     fig.update_layout(
         title={
             'text': f"Mental Health Distribution -<br>{country_name} ({year})",
-            # 'y': 0.95,
             'x': 0.5,
             'xanchor': 'center'
-            # 'yanchor': 'top'
         },
         autosize=True,
         showlegend=True,
@@ -39,7 +47,10 @@ def get_donut_graph(mh_data, country_code, country_name, year, colors):
         ),
         margin=dict(t=90, b=120, l=30, r=30)
     )
-    return fig
+    
+    donut_note = f'In {year}, {highest_disorder} was the most prevalent mental disorder in {country_name} out of the five.'
+    
+    return fig, donut_note
 
 
 def get_default_donut(colors):
@@ -47,10 +58,9 @@ def get_default_donut(colors):
     
     # Create the donut chart
     fig = go.Figure(data=[go.Pie(
-        # labels=labels,
         values=values,
         hole=0.4,
-        marker=dict(colors=[colors['green']]),
+        marker=dict(colors=[colors['aqua']]),
         hoverinfo ='none',
         textinfo='none'
         

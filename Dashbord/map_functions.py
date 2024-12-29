@@ -1,8 +1,7 @@
 ## Map functions
 import pandas as pd
 import plotly.express as px
-
-
+import friendly_names as fn
 
 def normalize_and_classify(df, column):
     """
@@ -79,35 +78,6 @@ def classify_percentage(percentage):
         return 'C'
 
 
-def get_map_color_sets():
-    color_sets = {'pink-blue': [
-    '#e8e8e8',  # Light Gray (Bottom-left: Low disorder, Low indicator )
-    '#ace4e4',  # Pale Aqua (Bottom-center: Low , Medium )
-    '#5ac8c8',  # Bright Teal (Bottom-right: Low , High)
-    '#dfb0d6',  # Soft Pink (Middle-left: Medium , Low)
-    '#a5add3',  # Periwinkle (Middle-center: Medium , Medium )
-    '#5698b9',  # Sky Blue (Middle-right: Medium , High)
-    '#be64ac',  # Orchid (Top-left: High , Low )
-    '#8c62aa',  # Violet (Top-center: High , Medium)
-    '#3b4994'   # Navy Blue (Top-right: High , High)
-],
-                  'pink-blue-2': [
-    '#f4f799',  # Light Gray (Bottom-left: Low disorder, Low indicator) old #f0f0f0
-    '#89d3d3',  # Aqua (Bottom-center: Low disorder, Medium indicator)
-    '#2ca3a3',  # Deep Teal (Bottom-right: Low disorder, High indicator)
-    '#e8a3cc',  # Blush Pink (Middle-left: Medium disorder, Low indicator)
-    '#a983d5',  # Lavender (Middle-center: Medium disorder, Medium indicator)
-    '#416eb7',  # Rich Blue (Middle-right: Medium disorder, High indicator)
-    '#d96ba8',  # Magenta (Top-left: High disorder, Low indicator)
-    '#9a52c2',  # Amethyst (Top-center: High disorder, Medium indicator)
-    '#2f3b99'   # Deep Navy (Top-right: High disorder, High indicator)
-],
-        'teal-red':    ['#e8e8e8', '#e4acac', '#c85a5a', '#b0d5df', '#ad9ea5', '#985356', '#64acbe', '#627f8c', '#574249'],
-        'blue-organe': ['#fef1e4', '#fab186', '#f3742d',  '#97d0e7', '#b0988c', '#ab5f37', '#18aee5', '#407b8f', '#5c473d']
-    }
-    return color_sets
-
-
 def create_bivariate_color_mapping(colors):
     return {
         ('A', 'A'): colors[0],
@@ -176,8 +146,8 @@ def add_bivariate_legend(fig, x_legend, y_legend, colors, conf=None):
     # Use default configuration if none is provided
     if conf is None:
         conf = {
-            'top': 0.3,  # Vertical position of the top right corner (0: bottom, 1: top)
-            'right': 0.25,  # Horizontal position of the top right corner (0: left, 1: right)
+            'top': 0.4,  # Vertical position of the top right corner (0: bottom, 1: top)
+            'right': 0.2,  # Horizontal position of the top right corner (0: left, 1: right)
             'box_w': 0.04,  # Width of each rectangle
             'box_h': 0.08,  # Height of each rectangle
             'line_color': 'rgba(0,0,0,0)',  # Transparent borders
@@ -224,7 +194,7 @@ def add_bivariate_legend(fig, x_legend, y_legend, colors, conf=None):
         x=coord[8]['x1'], y=coord[8]['y1'],  #position
         xref='paper', yref='paper',
         showarrow=False,
-        text=f"{conf['legend_x_label']} 🠒",
+        text=f"{conf['legend_x_label']}",
         font=dict(
             size=conf['legend_font_size'],
             color=conf['legend_font_color']
@@ -251,7 +221,7 @@ def add_bivariate_legend(fig, x_legend, y_legend, colors, conf=None):
     return fig
 
 
-def plot_bivariate_map(df, disorder, factor, year, color_set_name, highlight_country=None):
+def plot_bivariate_map(df, disorder, factor, year, map_colors, highlight_country=None):
     """
     Plot a bivariate choropleth map based on classifications.
 
@@ -267,12 +237,8 @@ def plot_bivariate_map(df, disorder, factor, year, color_set_name, highlight_cou
     """
     df_year = df[df['Year'] == year].copy()
 
-    # Select the color set
-    color_sets = get_map_color_sets()
-    colors = color_sets[color_set_name]
-
     # Create a color mapping
-    color_mapping = create_bivariate_color_mapping(colors)
+    color_mapping = create_bivariate_color_mapping(map_colors)
 
     # Assign colors to countries
     df = assign_bivariate_colors(df_year, disorder, factor, color_mapping)
@@ -282,14 +248,12 @@ def plot_bivariate_map(df, disorder, factor, year, color_set_name, highlight_cou
         df,
         locations="Code",
         color="color",
+        hover_name="Entity",
         hover_data={
-            'Entity': True,
-            #disorder: ':.2f',
-            #factor: ':.2f',
+            'Entity': False,
             "Code": False
 
         },
-        title=f"Bivariate Map of {disorder.replace('_', ' ').title()} and {factor.replace('_', ' ').title()}",
         color_discrete_map="identity"
     )
 
@@ -299,15 +263,13 @@ def plot_bivariate_map(df, disorder, factor, year, color_set_name, highlight_cou
         coastlinecolor="Black",
         showland=True,
         landcolor="lightgray",
-        fitbounds="locations"
+        fitbounds="locations",
+        projection=dict(type='equirectangular'),
+        visible=False,
+        showframe=False
     )
 
     if highlight_country:
-        print(f"highlighted country: {highlight_country}")
-
-        # Create a new trace specifically for the highlighted country
-        highlighted_df = df[df['Code'] == highlight_country]
-
         fig.add_choropleth(
             locations=[highlight_country],
             z=[1],  # Dummy value
@@ -326,7 +288,9 @@ def plot_bivariate_map(df, disorder, factor, year, color_set_name, highlight_cou
     fig.update_layout(showlegend=False)
 
     # Add the bivariate legend
-    add_bivariate_legend(fig, factor.replace('_', ' ').title(), disorder.replace('_', ' ').title(), colors)
+    indicator_name = fn.get_friendly_indicator_title(factor)
+    disorder_name = fn.get_friendly_disorder(disorder)
+    add_bivariate_legend(fig, indicator_name, disorder_name, map_colors)
 
     return fig
 
@@ -351,7 +315,6 @@ def plot_default_map(df):
         color="default_color",  # Use the default color
         color_discrete_map={'lightgray': 'lightgray'},  # Map lightgray as the color
         hover_data={"Code": True, 'default_color': False},
-        title="Default Map (Select a Country to Highlight)"
     )
 
     #Update the map layout
@@ -360,6 +323,9 @@ def plot_default_map(df):
         coastlinecolor="Black",
         showland=True,
         landcolor="white",  # Set the land to white for a clean background
+        projection=dict(type='equirectangular'),
+        visible=False,
+        showframe=False
     )
 
 
