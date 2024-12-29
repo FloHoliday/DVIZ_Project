@@ -1,58 +1,94 @@
-# DVIZ Project
-By figgerio Finn EYER, Flo ITEM und Karim Darwiche
+# Data Story Dashboard
 
---------
-## World Mental Health and possible causes
+This project is a interactive dashboard built with Dash that visualizes the correlation between mental Health disorders and societal factors.
 
-## Important dates
-- 19.11-10.12.2024: coaching sessions per zoom
-- 17.12.2024: project presentations and peer feedback session
-- 07.01.2025: deadline for final submissions (before the exam session)
+## Prerequisites
 
-### TODO
-#### Dashboard 1
-Inputeingaben:
+- Python 3.8 or higher
+- pip (Python package installer, usually comes with Python)
 
-Was wird gezeigt:
+## Installation
 
-Daten:
+1. Clone this repository
+```bash
+git clone https://github.com/FloHoliday/DVIZ_Project/
+cd DVIZ_Project
+```
 
-- Map
-- 2 Faktoren einblenden
-- 1 Jahr wählen 
-- Bivariate Choroplethenkarte
+2. Create a virtual environment
+```bash
+# Windows
+python -m venv dashboard_mental_health
+.\dashboard_mental_health\Scripts\activate
 
-#### Dashboard 2:
-Inputeingaben:
+# macOS/Linux
+python -m venv venv
+source venv/bin/activate
+```
 
-Was wird gezeigt:
+3. Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
-Daten:
+## Running the Application
 
-- 1 Land
-- Vergleich von 2 (oder mehr) Faktoren, eine Krankheit ein Indikator(GDP)
-- Über ganze Zeit
+1. Ensure your virtual environment is activated
+2. Run the application:
+```bash
+python main.py
+```
+3. Open your web browser and navigate to `http://127.0.0.1:8050/`
 
-#### Dashboard 3: 
-Inputeingaben:
+## Development
 
-Was wird gezeigt:
+### Dependencies
+The project uses the following main libraries:
+- Dash - Web application framework
+- Pandas - Data manipulation and analysis
+- Plotly - Interactive visualizations
+- NumPy - Numerical computing
+- SciPy - Scientific computing
 
-Daten:
-- Vergleich von 2 Ländern 
-- Für ein Krankheiten,
-- Über ganze Zeit
+For a complete list of dependencies, see `requirements.txt`.
 
+## Usage
 
-#### Dashboard 4:
-Pro Land wie grosser Anteil pro Krankheit.
-Kreisdiagramm 
+[Describe how to use your application, including:]
+- Main features
+- How to interact with the visualizations
+- Any specific functionality users should know about
 
+## Troubleshooting
 
+Common issues and solutions:
 
-##### Vorgehen von User:
-Auswählen:
-  1. Jahr
-  2. Seidbar, Krankheit und Indikator
-  3. Auf Karte Landauswählen
-  4. 
+1. Port 8050 is already in use
+   - Solution: Change the port in app.py:
+     ```python
+     app.run_server(debug=True, port=[different-port-number])
+     ```
+
+2. Missing dependencies
+   - Solution: Ensure all requirements are installed:
+     ```bash
+     pip install -r requirements.txt
+     ```
+
+3. Virtual environment issues
+   - Solution: Delete the mental_health_dashboard folder and recreate:
+     ```bash
+     # Windows
+     rmdir venv /s /q
+     # macOS/Linux
+     rm -rf venv
+     
+     # Then recreate
+     python -m venv venv
+     ```
+
+## Contact
+If you have any questions, please contact us here:
+- Finn Eyer: finn.eyer@stud.hslu.ch
+- Florian Item: florian.item@stud.hslu.ch
+- Karim Darwiche: karim.darwiche@stud.hslu.ch
