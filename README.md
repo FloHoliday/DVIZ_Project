@@ -15,7 +15,7 @@ git clone https://github.com/FloHoliday/DVIZ_Project/
 cd DVIZ_Project
 ```
 
-2. Create a virtual environment
+2. Create a virtual environment (optional)
 ```bash
 # Windows
 python -m venv dashboard_mental_health
@@ -52,13 +52,6 @@ The project uses the following main libraries:
 
 For a complete list of dependencies, see `requirements.txt`.
 
-## Usage
-
-[Describe how to use your application, including:]
-- Main features
-- How to interact with the visualizations
-- Any specific functionality users should know about
-
 ## Troubleshooting
 
 Common issues and solutions:
@@ -86,6 +79,19 @@ Common issues and solutions:
      # Then recreate
      python -m venv venv
      ```
+
+
+## Attributions
+We pulled the dataset regarding to the mental health disroders from ourworldindata.org:
+- Saloni Dattani, Lucas Rodés-Guirao, Hannah Ritchie and Max Roser (2023) - “Mental Health” Published online at OurWorldinData.org. Retrieved from: 'https://ourworldindata.org/mental-health' [Online Resource]
+
+We used the following Datasets from data.worldbank.org under the Creative Commons Attribution 4.0 (CC-BY 4.0).
+Indicators:
+- GDP, in $: https://data.worldbank.org/indicator/NY.GDP.MKTP.CD
+- Health Expenditure, in $, PPP: https://data.worldbank.org/indicator/SH.XPD.CHEX.PP.CD
+- CO2 Emissions: https://data.worldbank.org/indicator/EN.GHG.CO2.MT.CE.AR5?view=map
+- Unemployment rate: https://data.worldbank.org/indicator/EN.GHG.CO2.MT.CE.AR5
+- Life expectancy: https://data.worldbank.org/indicator/SP.DYN.LE00.IN
 
 ## Contact
 If you have any questions, please contact us here:
