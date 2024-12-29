@@ -83,6 +83,7 @@ def create_country_comparison(df, country_code1, country_code2, disorder, indica
                 y=country_data[disorder],
                 name=f"{country_dict[country_code]} - {disorder_name}",
                 line=dict(color=line_color),
+                hoverinfo='skip'
             ),
             secondary_y=False,
         )
@@ -94,6 +95,7 @@ def create_country_comparison(df, country_code1, country_code2, disorder, indica
                 y=country_data[indicator],
                 name=f"{country_dict[country_code]} - {indicator_name}",
                 line=dict(color=dash_color, dash='dash'),
+                hoverinfo='skip'
             ),
             secondary_y=True,
         )
