@@ -5,7 +5,7 @@ def get_donut_graph(mh_data, country_code, country_name, year, colors):
                         'anxiety_disorders', 'bipolar_disorders',
                         'eating_disorders']
     
-    labels = [col.replace('_', ' ').title() for col in mental_health_columns]
+    labels = [col.replace('_', ' ').capitalize() for col in mental_health_columns]
     mh_data_filtered = mh_data[(mh_data['Code'] == country_code) & (mh_data['Year'] == year)]
     values = mh_data_filtered[mental_health_columns].values.flatten()
     lable_value_dict = dict(zip(labels, values))

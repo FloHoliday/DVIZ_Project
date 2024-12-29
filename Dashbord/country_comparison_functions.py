@@ -3,7 +3,7 @@ from plotly.subplots import make_subplots
 import pandas as pd
 from dash import html
 
-from dis_ind_functions import get_friendly_disorder, get_friendly_indicator
+import friendly_names as fn
 
 def get_default_comparison_graph(colors):
     """Returns a default empty comparison graph with instructions"""
@@ -73,8 +73,8 @@ def create_country_comparison(df, country_code1, country_code2, disorder, indica
         (country1_data, country_code1, colors['aqua'], colors['aqua']),
         (country2_data, country_code2, colors['blush-pink'], colors['blush-pink'])
     ]:
-        indicator_name = get_friendly_indicator(indicator)
-        disorder_name = get_friendly_disorder(disorder)
+        indicator_name = fn.get_friendly_indicator_title(indicator)
+        disorder_name = fn.get_friendly_disorder(disorder)
 
         # Add disorder trace
         fig.add_trace(
@@ -100,7 +100,6 @@ def create_country_comparison(df, country_code1, country_code2, disorder, indica
     
     # Update layout
     fig.update_layout(
-        # title=f"Comparison: {disorder_name} vs {indicator_name}",
         paper_bgcolor='white',
         plot_bgcolor='white',
         height=400,

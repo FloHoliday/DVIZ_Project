@@ -45,18 +45,6 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, country_name ,col
     ))
     # Update layout for secondary y-axis
     fig.update_layout(
-        # Title
-        title={
-            'text': f'{mh_display_name} and {indicator_title} in {country_name} over the Years',
-            'x': 0.5,  # Center the title
-            'xanchor': 'center',
-            'yanchor': 'top',
-            'font': {
-                'size': 18,
-                'color': '#333',  # Dark gray for a modern look
-                'family': 'Roboto, Arial, sans-serif'  # Clean sans-serif font
-            }
-        },
         
         # Background
         plot_bgcolor='#f9f9f9',  
@@ -144,20 +132,7 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, country_name ,col
 def get_default_corr_graph(colors):
     """Create a default figure with styling but no data."""
     fig = go.Figure()
-    fig.update_layout(
-        # Title
-        title={
-            'text': 'Select a Disorder and Indicator',
-            'x': 0.5,
-            'xanchor': 'center',
-            'yanchor': 'top',
-            'font': {
-                'size': 18,
-                'color': '#333',
-                'family': 'Roboto, Arial, sans-serif'
-            }
-        },
-        
+    fig.update_layout(        
         # Background
         plot_bgcolor='#f9f9f9',
         paper_bgcolor='#ffffff',

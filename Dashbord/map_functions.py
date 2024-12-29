@@ -1,8 +1,7 @@
 ## Map functions
 import pandas as pd
 import plotly.express as px
-
-
+import friendly_names as fn
 
 def normalize_and_classify(df, column):
     """
@@ -271,11 +270,6 @@ def plot_bivariate_map(df, disorder, factor, year, map_colors, highlight_country
     )
 
     if highlight_country:
-        print(f"highlighted country: {highlight_country}")
-
-        # Create a new trace specifically for the highlighted country
-        highlighted_df = df[df['Code'] == highlight_country]
-
         fig.add_choropleth(
             locations=[highlight_country],
             z=[1],  # Dummy value
@@ -294,7 +288,9 @@ def plot_bivariate_map(df, disorder, factor, year, map_colors, highlight_country
     fig.update_layout(showlegend=False)
 
     # Add the bivariate legend
-    add_bivariate_legend(fig, factor.replace('_', ' ').title(), disorder.replace('_', ' ').title(), map_colors)
+    indicator_name = fn.get_friendly_indicator_title(factor)
+    disorder_name = fn.get_friendly_disorder(disorder)
+    add_bivariate_legend(fig, indicator_name, disorder_name, map_colors)
 
     return fig
 

@@ -7,7 +7,7 @@ import map_functions as mf
 import donut_graph_functions as dg
 import corr_explain_functions as ce
 import country_comparison_functions as ccf
-import dis_ind_functions as dif
+import friendly_names as fn
 
 app = Dash(__name__)
 
@@ -193,7 +193,7 @@ app.layout = html.Div(
                             style={'width' : '72%'},
                             children=[
                                 html.Div(
-                                    style={**smoth_border_style, 'margin-bottom' : '20px', 'background-color' : 'white', 'padding': '0 20px 0 20px'},
+                                    style={**smoth_border_style, 'margin-bottom' : '10px', 'background-color' : 'white', 'padding': '0 20px 0 20px'},
                                     children=[
                                         html.H3("", style={'margin-bottom' : '0'}, id='map-title'),
                                         html.P("text here", id='map-description')
@@ -302,7 +302,7 @@ app.layout = html.Div(
 
                 # comparison
                 html.Div(id='country-comparison-box',
-                    style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'margin-top': '20px', 'padding': '20px', 'box-sizing': 'border-box', 'position':'relative'},
+                    style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'padding': '20px', 'box-sizing': 'border-box', 'position':'relative'},
                     children=[
                         # Title and description section
                         html.Div(
@@ -397,9 +397,6 @@ app.layout = html.Div(
 
 
 def update_map(disorder, indicator, year, click_data, relayout_data):
-
-    #Zooming issue
-
     trigger = ctx.triggered[0]['prop_id'].split('.')[0]
 
     # When zooming occurs, check and enforce zoom limits
@@ -432,8 +429,8 @@ def update_map(disorder, indicator, year, click_data, relayout_data):
         highlight_country=clicked_country
         )
     
-    disorder_title = disorder.replace('_', ' ').title()
-    indicator_title = indicator.replace('_', ' ').title()
+    disorder_title = fn.get_friendly_disorder(disorder)
+    indicator_title = fn.get_friendly_indicator_text(indicator)
     map_title = f'Bivariate map of {disorder_title} and {indicator_title} in {year}'
     explaination_text = f'This bivariate map visualizes the relationship between {disorder_title} prevalence and {indicator_title} across countries. Combined color gradients highlight patterns or correlations, revealing how these variables interact globally.'
 
@@ -558,11 +555,11 @@ def update_graph_description(clickData, disorder, indicator):
     country_name = country_dict[country_code]
 
     # Format disorder name for display
-    friendly_disorder = dif.get_friendly_disorder(disorder)
-    friendly_indicator = dif.get_friendly_disorder(indicator)
+    friendly_disorder = fn.get_friendly_disorder(disorder)
+    friendly_indicator = fn.get_friendly_indicator_title(indicator)
 
     # Create title and description
-    title = f"{friendly_disorder} and {friendly_indicator} Analysis for {country_name}"
+    title = f"{friendly_disorder} and {friendly_indicator} analysis for {country_name}"
     description = (
         f"This graph shows the relationship between {friendly_disorder} prevalence "
         f"and {friendly_indicator} in {country_name} over time. The lines represent "
