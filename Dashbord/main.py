@@ -570,4 +570,4 @@ def update_graph_description(clickData, disorder, indicator):
     return title, description
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
