@@ -4,7 +4,7 @@ This project is a interactive dashboard built with Dash that visualizes the corr
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Python 3.13.0
 - pip (Python package installer, usually comes with Python)
 
 ## Installation
@@ -24,20 +24,21 @@ python -m venv dashboard_mental_health
 python -m venv venv
 source venv/bin/activate
 ```
-
-3. Install dependencies
+## Running the Application
+1. Ensure your virtual environment is activated
+2. Install dependencies
 ```bash
 make install
 ```
 
-## Running the Application
 
-1. Ensure your virtual environment is activated
-2. Run the application:
+
+
+3. Run the application:
 ```bash
 make run
 ```
-3. Open your web browser and navigate to `http://127.0.0.1:8050/`
+4. Open your web browser and navigate to `http://127.0.0.1:8050/`
 
 ## Development
 
