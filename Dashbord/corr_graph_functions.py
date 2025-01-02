@@ -9,11 +9,11 @@ def get_corr_graph(mh_data, disorder, indicator, country_code, country_name ,col
 
     match indicator:
         case 'gdp':
-            indicator_title = 'GDP (in billions)'
+            indicator_title = 'GDP (in billion USD)'
         case 'co2_emissions':
-            indicator_title = 'CO2 emissions'
+            indicator_title = 'CO2 emissions (in Mt CO2e)'
         case 'unemployment_rate':
-            indicator_title = 'Unemployment rate'
+            indicator_title = 'Unemployment rate (in %)'
         case 'life_expectancy':
             indicator_title = 'Life expectancy (in years)'
         case 'health_expenditure':

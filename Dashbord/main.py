@@ -39,15 +39,15 @@ colors = {
 }
 
 map_colors = [
-    colors['light-yellow'], 
-    colors['aqua'], 
-    colors['deep-teal'], 
-    colors['blush-pink'], 
-    colors['lavender'], 
-    colors['rich-blue'], 
-    colors['magenta'], 
-    colors['amethyst'], 
-    colors['deep-navy'], 
+    colors['light-yellow'],
+    colors['aqua'],
+    colors['deep-teal'],
+    colors['blush-pink'],
+    colors['lavender'],
+    colors['rich-blue'],
+    colors['magenta'],
+    colors['amethyst'],
+    colors['deep-navy'],
 ]
 
 country_code_df = mh_data[['Entity', 'Code']].drop_duplicates()
@@ -428,7 +428,7 @@ def update_map(disorder, indicator, year, click_data, relayout_data):
         map_colors,
         highlight_country=clicked_country
         )
-    
+
     disorder_title = fn.get_friendly_disorder(disorder)
     indicator_title = fn.get_friendly_indicator_text(indicator)
     map_title = f'Bivariate map of {disorder_title} and {indicator_title} in {year}'
@@ -482,7 +482,7 @@ def update_corr_and_donut(disorder, indicator, click_data, year):
     country_name = country_dict[country_code]
     corr_fig = cg.get_corr_graph(mh_data, disorder, indicator, country_code, country_name, colors)
     donut_fig, donut_note = dg.get_donut_graph(mh_data, country_code, country_name, year, colors)
-    
+
     return corr_fig, donut_fig, donut_note
 
 
@@ -570,4 +570,4 @@ def update_graph_description(clickData, disorder, indicator):
     return title, description
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)

@@ -1,21 +1,20 @@
-# Data Story Dashboard
+  # Data Story Dashboard
 
 This project is a interactive dashboard built with Dash that visualizes the correlation between mental Health disorders and societal factors.
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Python 3.13.0
 - pip (Python package installer, usually comes with Python)
 
 ## Installation
 
-1. Clone this repository
+1. Unzip the directory, change to the new location with your terminal
 ```bash
-git clone https://github.com/FloHoliday/DVIZ_Project/
 cd DVIZ_Project
 ```
 
-2. Create a virtual environment (optional)
+2. Create a virtual environment (optional), we suggest python 3.13.0
 ```bash
 # Windows
 python -m venv dashboard_mental_health
@@ -25,20 +24,21 @@ python -m venv dashboard_mental_health
 python -m venv venv
 source venv/bin/activate
 ```
-
-3. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
 ## Running the Application
-
 1. Ensure your virtual environment is activated
-2. Run the application:
+2. Install dependencies
 ```bash
-python main.py
+make install
 ```
-3. Open your web browser and navigate to `http://127.0.0.1:8050/`
+
+
+
+
+3. Run the application:
+```bash
+make run
+```
+4. Open your web browser and navigate to `http://127.0.0.1:8050/`
 
 ## Development
 
@@ -75,7 +75,7 @@ Common issues and solutions:
      rmdir venv /s /q
      # macOS/Linux
      rm -rf venv
-     
+
      # Then recreate
      python -m venv venv
      ```
