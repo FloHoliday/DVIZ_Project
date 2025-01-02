@@ -12,30 +12,34 @@ import friendly_names as fn
 app = Dash(__name__)
 
 # Import mental health data
-mh_data = pd.read_csv('mental_health.csv', delimiter=';')
-countries = mh_data.Entity.unique()
+mh_data = pd.read_csv('Dashbord/data/mental_health_and_indicators.csv', delimiter=';')
 available_years = mh_data['Year'].unique().tolist()
 
 # Filter out nulls first, then remove duplicates
 filtered_data = mh_data[mh_data["Code"].notna()]
 unique_countries = filtered_data[["Entity", "Code"]].drop_duplicates()
 
-smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(0, 0, 0, 0.13) 0px 1px 4px', 'overflow':'hidden'}
-std_box_padding = {'padding': '20px'}
+country_code_df = mh_data[['Entity', 'Code']].drop_duplicates()
+country_dict = dict(zip(country_code_df['Code'], country_code_df['Entity']))
+
+# Data preparation for the map
+disorders_factors = list(mh_data.columns)[3:]
+mh_data_cp = mh_data.copy()
+mh_data_map = mf.classify_disorders(mh_data_cp, disorders_factors)
 
 colors = {
-    'light-yellow' : '#f4f799',  # Light Gray (Bottom-left: Low disorder, Low indicator) old #f0f0f0
-    'aqua': '#89d3d3',  # Aqua (Bottom-center: Low disorder, Medium indicator)
-    'deep-teal': '#2ca3a3',  # Deep Teal (Bottom-right: Low disorder, High indicator)
-    'blush-pink' : '#e8a3cc',  # Blush Pink (Middle-left: Medium disorder, Low indicator)
-    'lavender' : '#a983d5',  # Lavender (Middle-center: Medium disorder, Medium indicator)
-    'rich-blue' : '#416eb7',  # Rich Blue (Middle-right: Medium disorder, High indicator)
-    'magenta' : '#d96ba8',  # Magenta (Top-left: High disorder, Low indicator)
-    'amethyst' : '#9a52c2',  # Amethyst (Top-center: High disorder, Medium indicator)
-    'deep-navy' : '#2f3b99',   # Deep Navy (Top-right: High disorder, High indicator)
-    'positive': '#34d399',  # Green for positive correlation
-    'negative': '#f87171',  # Red for negative correlation
-    'neutral': '#9ca3af',    # Gray for weak correlation
+    'light-yellow' : '#f4f799',  
+    'aqua': '#89d3d3',  
+    'deep-teal': '#2ca3a3',  
+    'blush-pink' : '#e8a3cc', 
+    'lavender' : '#a983d5',
+    'rich-blue' : '#416eb7',
+    'magenta' : '#d96ba8',
+    'amethyst' : '#9a52c2',
+    'deep-navy' : '#2f3b99',
+    'positive': '#34d399',
+    'negative': '#f87171',
+    'neutral': '#9ca3af',
 }
 
 map_colors = [
@@ -50,20 +54,14 @@ map_colors = [
     colors['deep-navy'],
 ]
 
-country_code_df = mh_data[['Entity', 'Code']].drop_duplicates()
-country_dict = dict(zip(country_code_df['Code'], country_code_df['Entity']))
-
-# Data preparation for the map
-disorders_factors = list(mh_data.columns)[3:]
-mh_data_cp = mh_data.copy()
-mh_data_map = mf.classify_disorders(mh_data_cp, disorders_factors)
+smoth_border_style = {'border-radius':'5px', 'box-shadow': 'rgba(0, 0, 0, 0.13) 0px 1px 4px', 'overflow':'hidden'}
+std_box_padding = {'padding': '20px'}
 
 # Main wrapper element
 app.layout = html.Div(
     id='main-wrapper',
     style={'width' : '100%', 'display': 'flex', 'justify-content':'space-between'},
     children=[
-
         # Selecter sidebar
         html.Div(
             id='selecter-sidebar',
@@ -82,6 +80,7 @@ app.layout = html.Div(
                 'box-sizing': 'border-box'
             },
             children=[
+                # Logo container
                 html.Div(id='logo-container',
                     style={'width': '30%', 'overflow': 'hidden', 'margin-top': '30px'},
                     children=[
@@ -91,6 +90,7 @@ app.layout = html.Div(
                         )
                     ]
                 ),
+                # Disorder & Indicator dropdown wrapper
                 html.Div(
                     id='dropdown-wrapper',
                     style={'width':'100%', 'margin-bottom': '0px'},
@@ -122,28 +122,25 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-
                 # Display the currently selected country
                 html.Div(
                     id='flag-container',
                     style={
                         'width': '100%',
-                        'height': '100px',  # Fixed height
+                        'height': '100px',  
                         'display': 'flex',
                         'justify-content': 'center',
-                        'align-items': 'center',  # Center vertically
-                        'overflow': 'hidden'  # Hide overflow
+                        'align-items': 'center',
+                        'overflow': 'hidden'
                     },
                     children=[
                         html.Div(id='flag-component')
                     ]
                 ),
-
                 html.P('© 2025 Finn, Florian & Karim', id='copyright-text', style={'font-size': '12px'})
             ]
         ),
-
-        # Content wrapper
+        # Main content wrapper
         html.Div(id='content-wrapper',
             style={'width': '80%', 'display': 'flex', 'flex-direction':'column', 'align-items':'center', 'padding':'20px'},
             children=[
@@ -161,7 +158,6 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-
                 # Year Slider box
                 html.Div(id='year-slider-box',
                     style={
@@ -184,11 +180,10 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-
-                # Box for the map
                 html.Div(id='map-box',
                     style={'width':'100%', 'margin-bottom': '20px', 'display':'flex', 'justify-content':'space-between'},
                     children=[
+                        # Map box
                         html.Div(
                             style={'width' : '72%'},
                             children=[
@@ -207,6 +202,7 @@ app.layout = html.Div(
                                 )
                             ]
                         ),
+                        # Pie chart box
                         html.Div(id='donut-box',
                             style={'width':'26%','background-color':'white', **smoth_border_style},
                             children=[
@@ -216,7 +212,6 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-
                 # Wrapper for first row after map
                 html.Div(id='disorder-graph-wrapper',
                     style={'width':'100%', 'display':'flex', 'justify-content':'space-between', 'margin': '0 0 20px 0'},
@@ -241,7 +236,7 @@ app.layout = html.Div(
                                 )
                             ]
                         ),
-                        # Correlation Analysis Section
+                        # Correlation analysis section
                         html.Div(id='correlation-box',
                             style={'width': '26%', 'background-color': 'white', **smoth_border_style, 'padding': '20px', 'box-sizing': 'border-box', 'position':'relative'},
                             children=[
@@ -260,7 +255,6 @@ app.layout = html.Div(
                                                 )
                                             ]
                                         ),
-                                        # Center section - Strength bar
                                         html.Div(style={'width': '100%', 'margin-bottom': '30px'},
                                             children=[
                                                 html.Div(style={'margin-bottom': '5px'},
@@ -290,7 +284,6 @@ app.layout = html.Div(
                                                 )
                                             ]
                                         ),
-                                        # Right section - Interpretation
                                         html.Div(id='correlation-interpretation', style={'width': '100%', 'padding': '10px', 'margin-bottom': '30px'}),
                                         html.Em("Note: Correlation does not imply causation — these relationships are complex and multifaceted.", style={'color': '#666', 'font-size': '14px', 'position':'absolute', 'bottom':'20px', 'left':'20px'})
                                     ]
@@ -299,12 +292,10 @@ app.layout = html.Div(
                         ),
                     ]
                 ),
-
-                # comparison
+                # country comparison
                 html.Div(id='country-comparison-box',
                     style={'width': '100%', 'background-color': 'white', **smoth_border_style, 'padding': '20px', 'box-sizing': 'border-box', 'position':'relative'},
                     children=[
-                        # Title and description section
                         html.Div(
                             style={'margin-bottom': '20px'},
                             children=[
@@ -395,7 +386,6 @@ app.layout = html.Div(
      ]
 )
 
-
 def update_map(disorder, indicator, year, click_data, relayout_data):
     trigger = ctx.triggered[0]['prop_id'].split('.')[0]
 
@@ -412,23 +402,14 @@ def update_map(disorder, indicator, year, click_data, relayout_data):
             if MIN_ZOOM <= current_zoom <= MAX_ZOOM:
                 return no_update
 
-
-
-    if not disorder or not indicator:
+    if not all([disorder, indicator]):
         return mf.plot_default_map(mh_data_map), 'Please select all parameters', "Select a country and a disorder to view the bivariate map"
 
     clicked_country = None
     if click_data and 'points' in click_data and len(click_data['points']) > 0:
         clicked_country = click_data['points'][0].get('location')
 
-    map_fig = mf.plot_bivariate_map(
-        mh_data_map, disorder,
-        indicator,
-        year,
-        map_colors,
-        highlight_country=clicked_country
-        )
-
+    map_fig = mf.plot_bivariate_map(mh_data_map, disorder, indicator, year, map_colors, highlight_country=clicked_country)
     disorder_title = fn.get_friendly_disorder(disorder)
     indicator_title = fn.get_friendly_indicator_text(indicator)
     map_title = f'Bivariate map of {disorder_title} and {indicator_title} in {year}'
@@ -436,16 +417,18 @@ def update_map(disorder, indicator, year, click_data, relayout_data):
 
     return map_fig, map_title, explaination_text
 
-
+# Sidebar flag callback
 @app.callback(
-    Output('flag-component', 'children'),
-    [Input('disorder_map', 'clickData')]
+    Output(component_id='flag-component', component_property='children'),
+    [Input(component_id='disorder_map', component_property='clickData')]
 )
 def update_flag(click_data):
     if not click_data:
         return None
+    
     country_code = click_data['points'][0]['location']
     two_letter_code = ccf.three_to_two_letter_code(country_code)
+    
     if two_letter_code:
         return html.Img(
             src=f"https://flagcdn.com/w160/{two_letter_code}.png",
@@ -462,11 +445,13 @@ def update_flag(click_data):
     else:
         return None
 
-# Correlation graph & donut callback
+# Correlation graph & pie chart callback
 @app.callback(
      [Output(component_id='disorders_graph', component_property='figure'),
+      Output(component_id='graph-title', component_property='children'),
+      Output(component_id='graph-description', component_property='children')],
       Output(component_id='disorders_donut', component_property='figure'),
-      Output(component_id='donut_note', component_property='children')],
+      Output(component_id='donut_note', component_property='children'),
     [Input(component_id='slct_disorder', component_property='value'),
      Input(component_id='slct_indicator', component_property='value'),
      Input(component_id='disorder_map', component_property='clickData'),
@@ -475,29 +460,46 @@ def update_flag(click_data):
 
 def update_corr_and_donut(disorder, indicator, click_data, year):
 
-    if not disorder or not indicator or not click_data:
-        return cg.get_default_corr_graph(colors), dg.get_default_donut(colors), ''
+    if not all([disorder, indicator, click_data]):
+        return (cg.get_default_corr_graph(colors, available_years), 
+                "Please select all parameters",
+                "Select a country, disorder and indicator to view the analysis",
+                dg.get_default_donut(colors), 
+                ''
+        )
 
     country_code = click_data['points'][0]['location']
     country_name = country_dict[country_code]
-    corr_fig = cg.get_corr_graph(mh_data, disorder, indicator, country_code, country_name, colors)
+    corr_fig = cg.get_corr_graph(mh_data, disorder, indicator, country_code, colors)
+    
+    # Format disorder name for display
+    friendly_disorder = fn.get_friendly_disorder(disorder)
+    friendly_indicator = fn.get_friendly_indicator_title(indicator)
+    
+    # Create title and description
+    title = f"{friendly_disorder} and {friendly_indicator} analysis for {country_name}"
+    description = (
+        f"This graph shows the relationship between {friendly_disorder} prevalence "
+        f"and {friendly_indicator} in {country_name} over time. The lines represent "
+        f"the trends for both metrics, allowing you to observe any potential correlations "
+        f"or patterns between them."
+    )
+    
     donut_fig, donut_note = dg.get_donut_graph(mh_data, country_code, country_name, year, colors)
 
-    return corr_fig, donut_fig, donut_note
-
-
+    return corr_fig, title, description, donut_fig, donut_note
 
 # Correlation explaination callback
 @app.callback(
-    [Output('correlation-value', 'children'),
-     Output('correlation-value', 'style'),
-     Output('correlation-label', 'children'),
-     Output('strength-bar', 'style'),
-     Output('strength-label', 'children'),
-     Output('correlation-interpretation', 'children')],
+    [Output(component_id='correlation-value', component_property='children'),
+     Output(component_id='correlation-value', component_property='style'),
+     Output(component_id='correlation-label', component_property='children'),
+     Output(component_id='strength-bar', component_property='style'),
+     Output(component_id='strength-label', component_property='children'),
+     Output(component_id='correlation-interpretation', component_property='children')],
     [Input(component_id='disorder_map', component_property='clickData'),
-     Input('slct_disorder', 'value'),
-     Input('slct_indicator', 'value')]
+     Input(component_id='slct_disorder', component_property='value'),
+     Input(component_id='slct_indicator', component_property='value')]
 )
 def update_correlation(click_data, disorder, indicator):
     if not all([click_data, disorder, indicator]):
@@ -509,14 +511,14 @@ def update_correlation(click_data, disorder, indicator):
 
     return corr_explain[0], corr_explain[1], corr_explain[2], corr_explain[3], corr_explain[4], corr_explain[5]
 
-
+# Country comparison callback
 @app.callback(
-    [Output('country_comparison_graph', 'figure'),
-     Output('selected_country_display', 'children')],
-    [Input('disorder_map', 'clickData'),
-     Input('country_2_dropdown', 'value'),
-     Input('slct_disorder', 'value'),
-     Input('slct_indicator', 'value')]
+    [Output(component_id='country_comparison_graph', component_property='figure'),
+     Output(component_id='selected_country_display', component_property='children')],
+    [Input(component_id='disorder_map', component_property='clickData'),
+     Input(component_id='country_2_dropdown', component_property='value'),
+     Input(component_id='slct_disorder', component_property='value'),
+     Input(component_id='slct_indicator', component_property='value')]
 )
 def update_comparison_graph(click_data, country2, disorder, indicator):
     if not click_data:
@@ -528,46 +530,10 @@ def update_comparison_graph(click_data, country2, disorder, indicator):
         return ccf.get_default_comparison_graph(colors), f"Selected country: {country_dict[country1]}"
 
     return (
-        ccf.create_country_comparison(
-            mh_data, country1, country2, disorder, indicator, country_dict, colors
-        ),
+        ccf.create_country_comparison(mh_data, country1, country2, disorder, indicator, country_dict, colors),
         f"Selected country: {country_dict[country1]}"
     )
 
 
-@app.callback(
-    [Output('graph-title', 'children'),
-    Output('graph-description', 'children')],
-    [Input('disorder_map', 'clickData'),
-    Input('slct_disorder', 'value'),
-    Input('slct_indicator', 'value')]
-)
-def update_graph_description(clickData, disorder, indicator):
-    # Check if any input is missing
-    if not all([clickData, disorder, indicator]):
-        return (
-            "Please select all parameters",
-            "Select a country, disorder and indicator to view the analysis"
-        )
-
-    # Get country name from clickData
-    country_code = clickData['points'][0]['location']
-    country_name = country_dict[country_code]
-
-    # Format disorder name for display
-    friendly_disorder = fn.get_friendly_disorder(disorder)
-    friendly_indicator = fn.get_friendly_indicator_title(indicator)
-
-    # Create title and description
-    title = f"{friendly_disorder} and {friendly_indicator} analysis for {country_name}"
-    description = (
-        f"This graph shows the relationship between {friendly_disorder} prevalence "
-        f"and {friendly_indicator} in {country_name} over time. The lines represent "
-        f"the trends for both metrics, allowing you to observe any potential correlations "
-        f"or patterns between them."
-    )
-
-    return title, description
-
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
