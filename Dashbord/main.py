@@ -12,7 +12,7 @@ import friendly_names as fn
 app = Dash(__name__)
 
 # Import mental health data
-mh_data = pd.read_csv('mental_health.csv', delimiter=';')
+mh_data = pd.read_csv('Dashbord/data/mental_health.csv', delimiter=';')
 available_years = mh_data['Year'].unique().tolist()
 
 # Filter out nulls first, then remove duplicates
