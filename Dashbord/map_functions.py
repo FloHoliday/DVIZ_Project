@@ -70,11 +70,11 @@ def classify_percentage(percentage):
     """
     if percentage is None or pd.isna(percentage):
         return None
-    elif percentage < 33.33:  # Bottom third of the range
+    elif percentage < 33.33:
         return 'A'
-    elif percentage < 66.67:  # Middle third of the range
+    elif percentage < 66.67:
         return 'B'
-    else:  # Top third of the range
+    else:
         return 'C'
 
 
@@ -133,21 +133,34 @@ def assign_bivariate_colors(df, disorder, factor, color_mapping):
 
 def add_bivariate_legend(fig, x_legend, y_legend, colors, conf=None):
     """
-    Add a bivariate choropleth coddlor legend to a Plotly figure.
+    Add a bivariate choropleth color legend to a Plotly figure.
+
+    A bivariate legend visualizes the relationship between two variables using a 3x3 grid
+    of colored rectangles. The colors represent the intersection of both variables' values,
+    typically showing low-low to high-high combinations.
 
     Parameters:
-    - fig (plotly.graph_objects.Figure): The Plotly figure to which the legend will be added.
-    - colors (list): A list of 9 colors representing the bivariate legend. The colors should be ordered from low-low to high-high.
-    - conf (dict, optional): Configuration dictionary for legend customization. Defaults are used if not provided.
+    fig : plotly.graph_objects.Figure
+    The Plotly figure object to which the legend will be added
+    x_legend : str
+    Label for the x-axis (horizontal) variable
+    y_legend : str
+    Label for the y-axis (vertical) variable
+    colors : list
+    List of 9 colors in hex or RGB format representing the bivariate scale.
+    Colors should be ordered from bottom-left to top-right:
+    [low-low, low-med, low-high, med-low, med-med, med-high, high-low, high-med, high-high]
+    conf : dict, optional
 
     Returns:
-    - fig (plotly.graph_objects.Figure): The updated Plotly figure with the legend added.
+    plotly.graph_objects.Figure
+    The updated figure with the bivariate legend added
     """
     # Use default configuration if none is provided
     if conf is None:
         conf = {
-            'top': 0.4,  # Vertical position of the top right corner (0: bottom, 1: top)
-            'right': 0.2,  # Horizontal position of the top right corner (0: left, 1: right)
+            'top': 0.4,  # Vertical position
+            'right': 0.2,  # Horizontal position
             'box_w': 0.04,  # Width of each rectangle
             'box_h': 0.08,  # Height of each rectangle
             'line_color': 'rgba(0,0,0,0)',  # Transparent borders
@@ -271,7 +284,7 @@ def plot_bivariate_map(df, disorder, factor, year, map_colors, highlight_country
     if highlight_country:
         fig.add_choropleth(
             locations=[highlight_country],
-            z=[1],  # Dummy value
+            z=[1],
             colorscale=[[0, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,0)']],  # Transparent fill
             showscale=False,
             hoverinfo='skip',
@@ -310,7 +323,7 @@ def plot_default_map(df):
 
     fig = px.choropleth(
         df_copy,
-        locations="Code",  # ISO-3 country codes
+        locations="Code",  #country codes
         color="default_color",  # Use the default color
         color_discrete_map={'lightgray': 'lightgray'},  # Map lightgray as the color
         hover_name="Entity",
