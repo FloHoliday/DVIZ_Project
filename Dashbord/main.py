@@ -461,7 +461,7 @@ def update_flag(click_data):
 def update_corr_and_donut(disorder, indicator, click_data, year):
 
     if not all([disorder, indicator, click_data]):
-        return (cg.get_default_corr_graph(colors), 
+        return (cg.get_default_corr_graph(colors, available_years), 
                 "Please select all parameters",
                 "Select a country, disorder and indicator to view the analysis",
                 dg.get_default_donut(colors), 
@@ -536,4 +536,4 @@ def update_comparison_graph(click_data, country2, disorder, indicator):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)

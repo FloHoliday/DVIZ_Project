@@ -252,7 +252,6 @@ def plot_bivariate_map(df, disorder, factor, year, map_colors, highlight_country
         hover_data={
             'Entity': False,
             "Code": False
-
         },
         color_discrete_map="identity"
     )
@@ -314,7 +313,12 @@ def plot_default_map(df):
         locations="Code",  # ISO-3 country codes
         color="default_color",  # Use the default color
         color_discrete_map={'lightgray': 'lightgray'},  # Map lightgray as the color
-        hover_data={"Code": True, 'default_color': False},
+        hover_name="Entity",
+        hover_data={
+            'Entity': False,
+            'Code': False,
+            'default_color': False
+        }
     )
 
     #Update the map layout
