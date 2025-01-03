@@ -536,4 +536,4 @@ def update_comparison_graph(click_data, country2, disorder, indicator):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
