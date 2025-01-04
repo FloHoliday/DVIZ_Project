@@ -101,9 +101,9 @@ While the dataset is discussed and visualized on OurWorldinData.org, it was down
 We used the following datasets from data.worldbank.org for the indicators:
 - GDP, in $: https://data.worldbank.org/indicator/NY.GDP.MKTP.CD
 - Health Expenditure, in $, PPP: https://data.worldbank.org/indicator/SH.XPD.CHEX.PP.CD
-- CO2 Emissions: https://data.worldbank.org/indicator/EN.GHG.CO2.MT.CE.AR5
-- Unemployment rate: https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS
-- Life expectancy: https://data.worldbank.org/indicator/SP.DYN.LE00.IN
+- CO2 Emissions, in Mt CO2e: https://data.worldbank.org/indicator/EN.GHG.CO2.MT.CE.AR5
+- Unemployment rate, in %: https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS
+- Life expectancy, in years: https://data.worldbank.org/indicator/SP.DYN.LE00.IN
 
 ## Contact
 
