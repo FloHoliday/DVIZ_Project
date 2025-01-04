@@ -1,3 +1,4 @@
+import os
 from dash import Dash, dcc, html, Input, Output, no_update
 from dash import callback_context as ctx
 import pandas as pd
@@ -11,8 +12,10 @@ import friendly_names as fn
 
 app = Dash(__name__)
 
-# Import mental health data
-mh_data = pd.read_csv('Dashbord/data/mental_health_and_indicators.csv', delimiter=';')
+# Import mental health data using relative path
+script_dir = os.path.dirname(os.path.abspath(__file__)) # get the path of script
+csv_path = os.path.join(script_dir, 'data', 'mental_health_and_indicators.csv') # get the path of the csv file
+mh_data = pd.read_csv(csv_path, delimiter=';')
 available_years = mh_data['Year'].unique().tolist()
 
 # Filter out nulls first, then remove duplicates
