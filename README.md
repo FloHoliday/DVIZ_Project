@@ -98,13 +98,11 @@ We originally found the dataset on the mental health disroders on ourworldindata
 
 While the dataset is discussed and visualized on OurWorldinData.org, it was downloaded from [Kaggle](https://www.kaggle.com/datasets/imtkaggleteam/mental-health) for use in this project.
 
-We used the following datasets from data.worldbank.org under the Creative Commons Attribution 4.0 (CC-BY 4.0).
-Indicators:
-
+We used the following datasets from data.worldbank.org for the indicators:
 - GDP, in $: https://data.worldbank.org/indicator/NY.GDP.MKTP.CD
 - Health Expenditure, in $, PPP: https://data.worldbank.org/indicator/SH.XPD.CHEX.PP.CD
-- CO2 Emissions: https://data.worldbank.org/indicator/EN.GHG.CO2.MT.CE.AR5?view=map
-- Unemployment rate: https://data.worldbank.org/indicator/EN.GHG.CO2.MT.CE.AR5
+- CO2 Emissions: https://data.worldbank.org/indicator/EN.GHG.CO2.MT.CE.AR5
+- Unemployment rate: https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS
 - Life expectancy: https://data.worldbank.org/indicator/SP.DYN.LE00.IN
 
 ## Contact
