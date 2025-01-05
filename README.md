@@ -19,7 +19,7 @@ cd Mental_Health_Dashboard
 
 ```bash
 # Windows
-python -m venv dashboard_mental_health
+python -m venv venv
 .\dashboard_mental_health\Scripts\activate
 
 # macOS/Linux
