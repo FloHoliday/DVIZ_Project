@@ -1,4 +1,4 @@
-  # Menthal Health Dashboard
+# Menthal Health Dashboard
 
 This project is a interactive dashboard built with Dash that visualizes the correlation between mental Health disorders and societal factors.
 
@@ -10,11 +10,13 @@ This project is a interactive dashboard built with Dash that visualizes the corr
 ## Installation
 
 1. Extract the archive and navigate to the created directory
+
 ```bash
 cd Mental_Health_Dashboard
 ```
 
 2. Create a virtual environment (recomended), we suggest python 3.13.0
+
 ```bash
 # Windows
 python -m venv dashboard_mental_health
@@ -24,22 +26,28 @@ python -m venv dashboard_mental_health
 python -m venv venv
 source venv/bin/activate
 ```
+
 ## Running the Application
+
 1. Ensure your virtual environment is activated
 2. Install dependencies
+
 ```bash
 make install
 ```
 
-
-
-
 3. Run the application:
+
 ```bash
 make run
 ```
+
+Note: The first start-up can take up to two minutes
+
 4. Open your web browser and navigate to `http://127.0.0.1:8050/`
+
 ### Project Structure
+
 ```bash
 Mental_Health_Dashboard/
 ├── Dashboard/
@@ -61,10 +69,13 @@ Mental_Health_Dashboard/
 ├── Makefile                                   # Build automation
 └── README.md                                  # Documentation
 ```
+
 ## Development
 
 ### Dependencies
+
 The project uses the following main libraries:
+
 - Dash - Web application framework
 - Pandas - Data manipulation and analysis
 - Plotly - Interactive visualizations
@@ -78,19 +89,23 @@ For a complete list of dependencies, see `requirements.txt`.
 Common issues and solutions:
 
 1. Port 8050 is already in use
+
    - Solution: Change the port in app.py:
      ```python
      app.run_server(debug=True, port=[different-port-number])
      ```
 
 2. Missing dependencies
+
    - Solution: Ensure all requirements are installed:
      ```bash
      pip install -r requirements.txt
      ```
 
 3. Virtual environment issues
+
    - Solution: Delete the mental_health_dashboard folder and recreate:
+
      ```bash
      # Windows
      rmdir venv /s /q
@@ -101,7 +116,6 @@ Common issues and solutions:
      python -m venv venv
      ```
 
-
 ## Attributions
 
 We originally found the dataset on the mental health disroders on ourworldindata.org:
@@ -111,6 +125,7 @@ We originally found the dataset on the mental health disroders on ourworldindata
 While the dataset is discussed and visualized on OurWorldinData.org, it was downloaded from [Kaggle](https://www.kaggle.com/datasets/imtkaggleteam/mental-health) for use in this project.
 
 We used the following datasets from data.worldbank.org for the indicators:
+
 - GDP, in $: https://data.worldbank.org/indicator/NY.GDP.MKTP.CD
 - Health Expenditure, in $, PPP: https://data.worldbank.org/indicator/SH.XPD.CHEX.PP.CD
 - CO2 Emissions, in Mt CO2e: https://data.worldbank.org/indicator/EN.GHG.CO2.MT.CE.AR5
