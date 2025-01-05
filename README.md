@@ -32,11 +32,29 @@ source venv/bin/activate
 1. Ensure your virtual environment is activated
 2. Install dependencies
 
+### For Windows (if you don't have "Make" installed)
+1. Install the requirements:
+```bash
+pip install -r Dashboard/requirements.txt
+```
+
+This can take a while - now is the time to grab a coffee.
+
+2. Launch the Dashboard:
+```bash
+python Dashboard/main.py
+```
+Note: The first start-up can take up to two minutes
+
+3. Open your web browser and navigate to `http://127.0.0.1:8050/`
+
+### If you have "Make" (preinstalled on Linux/Mac OS)
+1. Install the application:
 ```bash
 make install
 ```
 
-3. Run the application:
+2. Run the application:
 
 ```bash
 make run
@@ -44,7 +62,7 @@ make run
 
 Note: The first start-up can take up to two minutes
 
-4. Open your web browser and navigate to `http://127.0.0.1:8050/`
+3. Open your web browser and navigate to `http://127.0.0.1:8050/`
 
 ### Project Structure
 
