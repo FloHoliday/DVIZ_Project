@@ -11,7 +11,7 @@ This project is a interactive dashboard built with Dash that visualizes the corr
 
 1. Extract the archive and navigate to the created directory
 ```bash
-cd DVIZ_Project
+cd Mental_Health_Dashboard
 ```
 
 2. Create a virtual environment (recomended), we suggest python 3.13.0
@@ -41,7 +41,7 @@ make run
 4. Open your web browser and navigate to `http://127.0.0.1:8050/`
 ### Project Structure
 ```bash
-DVIZ_PROJECT/
+Mental_Health_Dashboard/
 ├── Dashboard/
 │   ├── __pycache__/
 │   ├──assets/
