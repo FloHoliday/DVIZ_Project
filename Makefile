@@ -3,8 +3,8 @@
 # Variables
 PYTHON := python3
 PIP := pip3
-REQUIREMENTS := Dashbord/requirements.txt
-MAIN_SCRIPT := Dashbord/main.py
+REQUIREMENTS := Dashboard/requirements.txt
+MAIN_SCRIPT := Dashboard/main.py
 
 # Default target
 .PHONY: all
